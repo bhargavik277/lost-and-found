@@ -1,0 +1,151 @@
+Student_ID,Item_Name,Category,Location,Date_Reported,Time_Reported,Report_Type,Recovered,Search_Method,Difficulty,System_Usefulness,Preferred_Feature,Days_To_Recovery,Status
+STU001,Wallet,Personal Items,Library,2026-08-05,18:00,Lost,Yes,Checked college office,No centralized system,Very useful,Upload photo,2,Returned
+STU002,Mobile Phone,Electronics,Auditorium,2026-07-04,14:15,Lost,No,Posted in WhatsApp/group,No notification when item is found,Very useful,Upload photo,0,Active
+STU003,Earphones,Electronics,Parking,2026-08-13,09:00,Lost,Yes,Posted in WhatsApp/group,No way to track status,Very useful,Date and time,2,Returned
+STU004,USB Drive,Electronics,Auditorium,2026-07-06,09:45,Lost,No,Visited location,No notification when item is found,Very useful,Location-based search,0,Active
+STU005,USB Drive,Electronics,Library,2026-08-16,08:15,Found,N/A,N/A,No major difficulty,Very useful,Upload photo,0,Active
+STU006,Mobile Phone,Electronics,Computer Lab,2026-08-18,18:30,Found,N/A,N/A,Information is scattered,Very useful,Search lost/found items,0,Matched
+STU007,Books,Study Materials,Canteen,2026-07-10,16:15,Lost,No,Asked classmates,No centralized system,Very useful,Location-based search,0,Active
+STU008,Calculator,Study Materials,Classroom,2026-08-11,11:00,Lost,No,Contacted security,No centralized system,Very useful,Search lost/found items,0,Active
+STU009,USB Drive,Electronics,Computer Lab,2026-08-10,14:45,Found,N/A,N/A,Information is scattered,Very useful,Search lost/found items,0,Active
+STU010,Calculator,Study Materials,Corridor,2026-08-24,13:15,Lost,No,Asked classmates,No notification when item is found,Very useful,Upload photo,0,Active
+STU011,Wallet,Personal Items,Corridor,2026-07-21,17:00,Lost,No,Posted in WhatsApp/group,No centralized system,Useful,Notifications,0,Active
+STU012,Calculator,Study Materials,Library,2026-07-02,18:30,Lost,No,Did not search,Difficult to identify correct item,Very useful,Notifications,0,Active
+STU013,Earphones,Electronics,Canteen,2026-08-03,16:00,Lost,No,Did not search,Difficult to identify correct item,Useful,Secure communication,0,Active
+STU014,USB Drive,Electronics,Auditorium,2026-08-17,16:00,Lost,No,Checked college office,Difficult to identify correct item,Very useful,Upload photo,0,Active
+STU015,Water Bottle,Personal Items,Classroom,2026-08-09,11:00,Found,N/A,N/A,No way to track status,Useful,Upload photo,0,Active
+STU016,Calculator,Study Materials,Auditorium,2026-07-17,10:30,Found,N/A,N/A,No notification when item is found,Useful,Notifications,0,Matched
+STU017,Mobile Phone,Electronics,Corridor,2026-07-26,18:30,Found,N/A,N/A,No centralized system,Neutral,Notifications,0,Matched
+STU018,Wallet,Personal Items,Auditorium,2026-07-09,11:15,Lost,Yes,Visited location,No way to track status,Useful,Upload photo,5,Returned
+STU019,Mobile Phone,Electronics,Library,2026-07-05,16:15,Lost,No,Contacted security,Unclear whom to contact,Very useful,Secure communication,0,Active
+STU020,Earphones,Electronics,Computer Lab,2026-08-30,14:15,Found,N/A,N/A,No way to track status,Very useful,Notifications,0,Active
+STU021,Water Bottle,Personal Items,Classroom,2026-08-29,18:00,Lost,No,Visited location,No centralized system,Useful,Upload photo,0,Active
+STU022,Mobile Phone,Electronics,Playground,2026-08-27,15:15,Lost,Yes,Visited location,No centralized system,Useful,Secure communication,2,Returned
+STU023,Wallet,Personal Items,Laboratory,2026-07-02,10:45,Lost,No,Posted in WhatsApp/group,No centralized system,Very useful,Notifications,0,Active
+STU024,ID Card,Documents,Playground,2026-07-01,15:30,Lost,No,Posted in WhatsApp/group,Unclear whom to contact,Neutral,Secure communication,0,Active
+STU025,Keys,Personal Items,Sports Room,2026-08-07,16:00,Lost,Yes,Did not search,Difficult to identify correct item,Very useful,Secure communication,1,Returned
+STU026,Keys,Personal Items,Library,2026-07-21,10:00,Lost,Yes,Checked college office,No way to track status,Useful,Search lost/found items,5,Returned
+STU027,Clothing/Accessories,Clothing,Classroom,2026-08-01,17:00,Lost,No,Posted in WhatsApp/group,Unclear whom to contact,Useful,Secure communication,0,Active
+STU028,Water Bottle,Personal Items,Laboratory,2026-07-27,12:45,Found,N/A,N/A,Information is scattered,Useful,Date and time,0,Matched
+STU029,Keys,Personal Items,Sports Room,2026-07-10,09:00,Lost,Yes,Checked college office,Information is scattered,Very useful,Search lost/found items,5,Returned
+STU030,Water Bottle,Personal Items,Playground,2026-08-01,10:45,Found,N/A,N/A,No major difficulty,Very useful,Date and time,0,Matched
+STU031,USB Drive,Electronics,Library,2026-07-02,10:30,Found,N/A,N/A,No way to track status,Neutral,Location-based search,0,Matched
+STU032,Calculator,Study Materials,Parking,2026-08-06,11:30,Lost,No,Checked college office,No centralized system,Very useful,Upload photo,0,Active
+STU033,Wallet,Personal Items,Canteen,2026-08-05,18:30,Lost,Yes,Asked classmates,Unclear whom to contact,Very useful,Location-based search,3,Returned
+STU034,Clothing/Accessories,Clothing,Canteen,2026-07-15,16:00,Lost,Yes,Contacted security,No notification when item is found,Very useful,Notifications,6,Returned
+STU035,Earphones,Electronics,Classroom,2026-08-16,13:15,Lost,No,Did not search,Information is scattered,Useful,Date and time,0,Active
+STU036,Calculator,Study Materials,Laboratory,2026-08-22,10:15,Found,N/A,N/A,No centralized system,Very useful,Location-based search,0,Active
+STU037,Water Bottle,Personal Items,Playground,2026-08-22,10:00,Found,N/A,N/A,No centralized system,Useful,Notifications,0,Active
+STU038,Mobile Phone,Electronics,Laboratory,2026-08-28,11:00,Lost,Yes,Did not search,Information is scattered,Very useful,Date and time,7,Returned
+STU039,Wallet,Personal Items,Auditorium,2026-08-05,14:30,Found,N/A,N/A,No way to track status,Very useful,Date and time,0,Matched
+STU040,Earphones,Electronics,Corridor,2026-08-03,13:30,Lost,Yes,Posted in WhatsApp/group,No notification when item is found,Not very useful,Upload photo,5,Returned
+STU041,Clothing/Accessories,Clothing,Classroom,2026-07-25,14:00,Found,N/A,N/A,No notification when item is found,Neutral,Secure communication,0,Matched
+STU042,Mobile Phone,Electronics,Parking,2026-07-09,17:30,Lost,No,Did not search,No major difficulty,Very useful,Date and time,0,Active
+STU043,Calculator,Study Materials,Playground,2026-08-22,16:15,Lost,Yes,Asked classmates,No centralized system,Useful,Notifications,6,Returned
+STU044,Earphones,Electronics,Classroom,2026-08-08,12:30,Lost,No,Asked classmates,No centralized system,Useful,Secure communication,0,Active
+STU045,Water Bottle,Personal Items,Auditorium,2026-08-26,15:15,Lost,No,Did not search,No way to track status,Very useful,Location-based search,0,Active
+STU046,USB Drive,Electronics,Laboratory,2026-07-31,11:15,Lost,No,Visited location,No way to track status,Very useful,Notifications,0,Active
+STU047,USB Drive,Electronics,Corridor,2026-07-10,18:15,Found,N/A,N/A,Unclear whom to contact,Useful,Notifications,0,Matched
+STU048,Clothing/Accessories,Clothing,Library,2026-07-01,14:15,Lost,No,Asked classmates,No major difficulty,Neutral,Secure communication,0,Active
+STU049,Keys,Personal Items,Library,2026-08-01,15:15,Lost,No,Posted in WhatsApp/group,Unclear whom to contact,Very useful,Secure communication,0,Active
+STU050,USB Drive,Electronics,Auditorium,2026-08-26,14:45,Lost,No,Asked classmates,Unclear whom to contact,Useful,Notifications,0,Active
+STU051,Books,Study Materials,Laboratory,2026-08-05,12:45,Found,N/A,N/A,No way to track status,Useful,Search lost/found items,0,Matched
+STU052,Books,Study Materials,Corridor,2026-07-11,10:15,Lost,Yes,Visited location,No centralized system,Very useful,Secure communication,2,Returned
+STU053,Keys,Personal Items,Corridor,2026-07-27,17:00,Lost,No,Checked college office,No centralized system,Very useful,Date and time,0,Active
+STU054,Books,Study Materials,Computer Lab,2026-08-23,11:30,Found,N/A,N/A,No centralized system,Very useful,Notifications,0,Active
+STU055,Water Bottle,Personal Items,Computer Lab,2026-08-21,10:00,Lost,No,Posted in WhatsApp/group,No notification when item is found,Very useful,Upload photo,0,Active
+STU056,Wallet,Personal Items,Canteen,2026-07-18,08:30,Lost,No,Posted in WhatsApp/group,Difficult to identify correct item,Very useful,Date and time,0,Active
+STU057,Water Bottle,Personal Items,Corridor,2026-08-18,12:00,Found,N/A,N/A,No centralized system,Very useful,Secure communication,0,Matched
+STU058,ID Card,Documents,Library,2026-08-14,18:00,Found,N/A,N/A,No major difficulty,Very useful,Search lost/found items,0,Active
+STU059,Mobile Phone,Electronics,Canteen,2026-07-20,15:00,Found,N/A,N/A,No notification when item is found,Neutral,Notifications,0,Active
+STU060,Books,Study Materials,Canteen,2026-07-22,12:00,Found,N/A,N/A,No notification when item is found,Very useful,Date and time,0,Active
+STU061,USB Drive,Electronics,Laboratory,2026-08-18,09:15,Lost,No,Visited location,Unclear whom to contact,Useful,Location-based search,0,Active
+STU062,USB Drive,Electronics,Auditorium,2026-07-06,14:30,Found,N/A,N/A,No way to track status,Very useful,Date and time,0,Matched
+STU063,ID Card,Documents,Corridor,2026-09-01,13:45,Found,N/A,N/A,Unclear whom to contact,Very useful,Search lost/found items,0,Active
+STU064,Calculator,Study Materials,Computer Lab,2026-08-04,14:30,Found,N/A,N/A,Difficult to identify correct item,Useful,Upload photo,0,Matched
+STU065,Books,Study Materials,Sports Room,2026-08-01,17:45,Found,N/A,N/A,Difficult to identify correct item,Very useful,Date and time,0,Matched
+STU066,Earphones,Electronics,Parking,2026-08-15,12:30,Lost,No,Checked college office,No way to track status,Very useful,Search lost/found items,0,Active
+STU067,Wallet,Personal Items,Laboratory,2026-08-22,15:45,Lost,No,Posted in WhatsApp/group,No major difficulty,Very useful,Date and time,0,Active
+STU068,Mobile Phone,Electronics,Parking,2026-08-01,15:30,Lost,Yes,Posted in WhatsApp/group,Unclear whom to contact,Very useful,Date and time,5,Returned
+STU069,Keys,Personal Items,Laboratory,2026-08-02,13:00,Lost,Yes,Did not search,No notification when item is found,Neutral,Location-based search,6,Returned
+STU070,Earphones,Electronics,Auditorium,2026-08-31,17:30,Lost,Yes,Visited location,No major difficulty,Very useful,Search lost/found items,5,Returned
+STU071,Water Bottle,Personal Items,Canteen,2026-07-02,12:00,Lost,No,Visited location,No notification when item is found,Very useful,Search lost/found items,0,Active
+STU072,Keys,Personal Items,Computer Lab,2026-07-02,15:45,Lost,No,Contacted security,Information is scattered,Neutral,Date and time,0,Active
+STU073,Keys,Personal Items,Library,2026-07-09,17:00,Lost,No,Asked classmates,Information is scattered,Useful,Date and time,0,Active
+STU074,Wallet,Personal Items,Sports Room,2026-07-16,17:15,Found,N/A,N/A,No major difficulty,Very useful,Notifications,0,Matched
+STU075,Keys,Personal Items,Classroom,2026-08-24,17:00,Lost,Yes,Asked classmates,Unclear whom to contact,Very useful,Location-based search,5,Returned
+STU076,Wallet,Personal Items,Canteen,2026-07-23,08:45,Lost,No,Posted in WhatsApp/group,Unclear whom to contact,Useful,Date and time,0,Active
+STU077,ID Card,Documents,Computer Lab,2026-08-06,09:15,Lost,No,Contacted security,No major difficulty,Useful,Secure communication,0,Active
+STU078,Mobile Phone,Electronics,Playground,2026-07-29,10:00,Lost,No,Visited location,Information is scattered,Useful,Secure communication,0,Active
+STU079,USB Drive,Electronics,Computer Lab,2026-08-26,12:45,Found,N/A,N/A,Difficult to identify correct item,Very useful,Notifications,0,Active
+STU080,Keys,Personal Items,Parking,2026-07-06,17:30,Lost,No,Visited location,No way to track status,Very useful,Location-based search,0,Active
+STU081,USB Drive,Electronics,Playground,2026-07-03,17:00,Lost,No,Asked classmates,No centralized system,Very useful,Notifications,0,Active
+STU082,Books,Study Materials,Computer Lab,2026-08-25,09:45,Lost,No,Contacted security,No centralized system,Very useful,Location-based search,0,Active
+STU083,Wallet,Personal Items,Computer Lab,2026-08-12,12:45,Found,N/A,N/A,No major difficulty,Useful,Upload photo,0,Matched
+STU084,Keys,Personal Items,Corridor,2026-08-02,16:00,Lost,Yes,Did not search,No major difficulty,Very useful,Notifications,7,Returned
+STU085,ID Card,Documents,Computer Lab,2026-08-16,18:45,Lost,No,Visited location,Information is scattered,Very useful,Search lost/found items,0,Active
+STU086,Books,Study Materials,Sports Room,2026-09-01,11:15,Lost,Yes,Contacted security,No notification when item is found,Very useful,Notifications,6,Returned
+STU087,Wallet,Personal Items,Library,2026-07-15,18:15,Lost,No,Posted in WhatsApp/group,Unclear whom to contact,Very useful,Location-based search,0,Active
+STU088,Books,Study Materials,Laboratory,2026-08-31,15:15,Lost,No,Posted in WhatsApp/group,Information is scattered,Neutral,Secure communication,0,Active
+STU089,Earphones,Electronics,Parking,2026-08-05,16:30,Found,N/A,N/A,No major difficulty,Very useful,Location-based search,0,Matched
+STU090,Books,Study Materials,Computer Lab,2026-09-01,16:45,Found,N/A,N/A,Difficult to identify correct item,Very useful,Secure communication,0,Active
+STU091,Clothing/Accessories,Clothing,Laboratory,2026-08-11,17:45,Lost,No,Asked classmates,No major difficulty,Useful,Upload photo,0,Active
+STU092,Water Bottle,Personal Items,Canteen,2026-08-18,15:00,Found,N/A,N/A,Information is scattered,Very useful,Secure communication,0,Matched
+STU093,Water Bottle,Personal Items,Auditorium,2026-08-26,15:00,Found,N/A,N/A,Unclear whom to contact,Very useful,Location-based search,0,Active
+STU094,Earphones,Electronics,Corridor,2026-08-03,18:00,Lost,Yes,Contacted security,No major difficulty,Useful,Secure communication,6,Returned
+STU095,Clothing/Accessories,Clothing,Sports Room,2026-09-01,09:15,Found,N/A,N/A,Unclear whom to contact,Useful,Date and time,0,Active
+STU096,Mobile Phone,Electronics,Library,2026-08-25,15:15,Found,N/A,N/A,Unclear whom to contact,Very useful,Upload photo,0,Active
+STU097,ID Card,Documents,Corridor,2026-07-08,10:15,Lost,Yes,Checked college office,No centralized system,Very useful,Search lost/found items,3,Returned
+STU098,Earphones,Electronics,Laboratory,2026-08-18,15:15,Lost,No,Asked classmates,No centralized system,Useful,Notifications,0,Active
+STU099,Books,Study Materials,Auditorium,2026-08-29,10:00,Lost,No,Posted in WhatsApp/group,Difficult to identify correct item,Not very useful,Date and time,0,Active
+STU100,Clothing/Accessories,Clothing,Laboratory,2026-08-28,14:45,Lost,No,Visited location,Information is scattered,Very useful,Date and time,0,Active
+STU101,USB Drive,Electronics,Corridor,2026-08-07,12:00,Lost,Yes,Checked college office,No major difficulty,Useful,Location-based search,7,Returned
+STU102,ID Card,Documents,Laboratory,2026-09-02,17:30,Found,N/A,N/A,Information is scattered,Useful,Secure communication,0,Matched
+STU103,Books,Study Materials,Classroom,2026-07-18,12:45,Lost,No,Visited location,No notification when item is found,Very useful,Search lost/found items,0,Active
+STU104,Wallet,Personal Items,Canteen,2026-08-11,11:15,Found,N/A,N/A,No major difficulty,Very useful,Date and time,0,Matched
+STU105,Calculator,Study Materials,Playground,2026-08-04,15:30,Lost,No,Did not search,No major difficulty,Very useful,Upload photo,0,Active
+STU106,Keys,Personal Items,Corridor,2026-07-19,16:30,Found,N/A,N/A,No way to track status,Useful,Upload photo,0,Active
+STU107,Books,Study Materials,Playground,2026-08-28,17:45,Lost,Yes,Did not search,Difficult to identify correct item,Very useful,Search lost/found items,6,Returned
+STU108,Keys,Personal Items,Laboratory,2026-08-11,18:00,Lost,No,Did not search,No major difficulty,Very useful,Location-based search,0,Active
+STU109,Books,Study Materials,Playground,2026-07-15,15:00,Lost,Yes,Visited location,Information is scattered,Neutral,Search lost/found items,1,Returned
+STU110,Clothing/Accessories,Clothing,Canteen,2026-08-23,14:00,Lost,No,Posted in WhatsApp/group,No notification when item is found,Very useful,Date and time,0,Active
+STU111,ID Card,Documents,Laboratory,2026-07-28,13:00,Lost,No,Did not search,Difficult to identify correct item,Very useful,Location-based search,0,Active
+STU112,Water Bottle,Personal Items,Computer Lab,2026-08-05,09:15,Lost,Yes,Did not search,Unclear whom to contact,Useful,Upload photo,1,Returned
+STU113,ID Card,Documents,Sports Room,2026-08-01,11:00,Found,N/A,N/A,No major difficulty,Useful,Search lost/found items,0,Active
+STU114,USB Drive,Electronics,Sports Room,2026-07-30,08:30,Lost,Yes,Asked classmates,Information is scattered,Very useful,Search lost/found items,2,Returned
+STU115,Wallet,Personal Items,Laboratory,2026-07-04,17:30,Lost,Yes,Visited location,Information is scattered,Very useful,Search lost/found items,3,Returned
+STU116,Clothing/Accessories,Clothing,Parking,2026-07-09,16:00,Lost,No,Posted in WhatsApp/group,No notification when item is found,Very useful,Secure communication,0,Active
+STU117,ID Card,Documents,Classroom,2026-08-08,08:45,Found,N/A,N/A,No major difficulty,Very useful,Location-based search,0,Matched
+STU118,Wallet,Personal Items,Parking,2026-08-26,17:15,Lost,Yes,Visited location,Information is scattered,Very useful,Location-based search,1,Returned
+STU119,USB Drive,Electronics,Sports Room,2026-08-11,16:30,Lost,No,Posted in WhatsApp/group,No notification when item is found,Useful,Upload photo,0,Active
+STU120,Wallet,Personal Items,Computer Lab,2026-07-28,11:45,Found,N/A,N/A,Difficult to identify correct item,Useful,Notifications,0,Matched
+STU121,Clothing/Accessories,Clothing,Parking,2026-08-10,18:30,Found,N/A,N/A,Difficult to identify correct item,Neutral,Location-based search,0,Matched
+STU122,Keys,Personal Items,Parking,2026-07-11,10:00,Lost,Yes,Checked college office,No notification when item is found,Very useful,Location-based search,1,Returned
+STU123,Wallet,Personal Items,Classroom,2026-08-24,12:30,Lost,No,Contacted security,No way to track status,Very useful,Search lost/found items,0,Active
+STU124,Earphones,Electronics,Parking,2026-07-29,16:30,Lost,No,Visited location,No major difficulty,Very useful,Search lost/found items,0,Active
+STU125,Clothing/Accessories,Clothing,Classroom,2026-07-04,10:30,Found,N/A,N/A,Unclear whom to contact,Useful,Date and time,0,Matched
+STU126,Water Bottle,Personal Items,Corridor,2026-07-19,09:15,Lost,No,Did not search,Unclear whom to contact,Not very useful,Upload photo,0,Active
+STU127,Calculator,Study Materials,Canteen,2026-08-23,13:30,Lost,No,Did not search,Difficult to identify correct item,Useful,Secure communication,0,Active
+STU128,USB Drive,Electronics,Sports Room,2026-07-07,08:00,Lost,Yes,Contacted security,No centralized system,Useful,Notifications,7,Returned
+STU129,USB Drive,Electronics,Library,2026-08-04,13:45,Lost,Yes,Visited location,Difficult to identify correct item,Useful,Secure communication,5,Returned
+STU130,Keys,Personal Items,Sports Room,2026-08-09,08:00,Lost,Yes,Asked classmates,Difficult to identify correct item,Neutral,Search lost/found items,4,Returned
+STU131,Books,Study Materials,Corridor,2026-07-16,10:15,Lost,Yes,Posted in WhatsApp/group,No notification when item is found,Useful,Secure communication,6,Returned
+STU132,Calculator,Study Materials,Corridor,2026-08-15,08:45,Found,N/A,N/A,No way to track status,Very useful,Upload photo,0,Active
+STU133,Water Bottle,Personal Items,Corridor,2026-08-21,12:00,Lost,No,Posted in WhatsApp/group,No way to track status,Neutral,Search lost/found items,0,Active
+STU134,USB Drive,Electronics,Library,2026-08-16,11:45,Lost,Yes,Checked college office,No centralized system,Very useful,Notifications,7,Returned
+STU135,Books,Study Materials,Canteen,2026-07-29,09:00,Found,N/A,N/A,No notification when item is found,Very useful,Date and time,0,Matched
+STU136,Water Bottle,Personal Items,Library,2026-07-19,10:30,Found,N/A,N/A,Information is scattered,Very useful,Search lost/found items,0,Active
+STU137,Wallet,Personal Items,Sports Room,2026-09-02,17:45,Lost,No,Did not search,No notification when item is found,Useful,Secure communication,0,Active
+STU138,Water Bottle,Personal Items,Computer Lab,2026-08-10,09:45,Found,N/A,N/A,No centralized system,Useful,Date and time,0,Active
+STU139,USB Drive,Electronics,Classroom,2026-07-10,08:30,Lost,Yes,Contacted security,No way to track status,Useful,Upload photo,4,Returned
+STU140,USB Drive,Electronics,Auditorium,2026-08-19,08:45,Lost,No,Checked college office,Unclear whom to contact,Very useful,Secure communication,0,Active
+STU141,Keys,Personal Items,Parking,2026-07-08,09:15,Lost,No,Visited location,Information is scattered,Useful,Notifications,0,Active
+STU142,Calculator,Study Materials,Corridor,2026-07-21,14:30,Lost,Yes,Did not search,No notification when item is found,Very useful,Location-based search,3,Returned
+STU143,Water Bottle,Personal Items,Corridor,2026-07-13,12:30,Lost,No,Did not search,No major difficulty,Useful,Secure communication,0,Active
+STU144,Earphones,Electronics,Playground,2026-07-19,18:45,Lost,No,Asked classmates,No notification when item is found,Useful,Upload photo,0,Active
+STU145,Books,Study Materials,Auditorium,2026-08-12,09:45,Lost,No,Checked college office,Difficult to identify correct item,Very useful,Date and time,0,Active
+STU146,Earphones,Electronics,Laboratory,2026-08-13,11:15,Found,N/A,N/A,Information is scattered,Very useful,Upload photo,0,Matched
+STU147,Calculator,Study Materials,Sports Room,2026-07-05,10:45,Found,N/A,N/A,Information is scattered,Very useful,Location-based search,0,Matched
+STU148,USB Drive,Electronics,Classroom,2026-07-22,14:30,Found,N/A,N/A,Unclear whom to contact,Useful,Notifications,0,Matched
+STU149,USB Drive,Electronics,Playground,2026-08-27,15:15,Lost,Yes,Contacted security,Unclear whom to contact,Neutral,Notifications,2,Returned
+STU150,Keys,Personal Items,Canteen,2026-08-18,11:15,Found,N/A,N/A,No major difficulty,Very useful,Location-based search,0,Matched
