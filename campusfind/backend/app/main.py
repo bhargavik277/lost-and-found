@@ -21,9 +21,11 @@ app = FastAPI(
     title="CampusFind API",
     description="Smart College Lost & Found Management System",
     version="1.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
 )
+
 
 # CORS
 app.add_middleware(
@@ -46,6 +48,20 @@ app.include_router(notifications.router)
 app.include_router(admin.router)
 
 
+@app.get("/")
+def root():
+    return {
+        "service": "CampusFind API",
+        "status": "running",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "redoc": "/redoc",
+        "openapi": "/openapi.json",
+        "health": "/health",
+    }
+
+
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "CampusFind API", "version": "1.0.0"}
+
