@@ -48,6 +48,7 @@ SELECTOR_REJECT_BUTTON = "button:has-text(\"Reject\")"
 
 async def fill_login(page: Page, email: str, password: str):
     await page.goto(f"{BASE_URL}/login")
+    await page.wait_for_load_state('domcontentloaded')
     await page.wait_for_selector(SELECTOR_EMAIL_INPUT)
     await page.fill(SELECTOR_EMAIL_INPUT, email)
     await page.wait_for_selector(SELECTOR_PASSWORD_INPUT)
