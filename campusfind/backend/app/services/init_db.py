@@ -5,7 +5,7 @@ from sqlalchemy import func
 from app.database import SessionLocal, engine, Base
 import app.models  # noqa: F401 — ensure all models are registered with Base
 from app.models.user import User, UserRole
-from app.services.auth_service import hash_password
+from app.services.auth_service import hash_password, verify_password
 
 logger = logging.getLogger("campusfind.init_db")
 
@@ -23,7 +23,7 @@ def init_database():
     """
     Safely initialize the database:
     1. Create all missing tables in PostgreSQL / SQLite.
-    2. Ensure required demo users (Admin and Student) exist without altering existing records.
+    2. Ensure required demo users (Admin and Student) exist and have correct active credentials.
     3. Safely seed the dataset items if CSV is available and database is empty.
     """
     logger.info("[*] Initializing database schema...")
@@ -31,7 +31,7 @@ def init_database():
 
     db: Session = SessionLocal()
     try:
-        # 1. Ensure Admin Demo exists
+        # 1. Ensure Admin Demo exists and has valid credentials
         admin = db.query(User).filter(func.lower(User.email) == ADMIN_EMAIL.lower()).first()
         if not admin:
             admin = User(
@@ -45,9 +45,13 @@ def init_database():
             db.add(admin)
             logger.info(f"[+] Demo admin created: {ADMIN_EMAIL}")
         else:
-            logger.info(f"[i] Demo admin already exists: {ADMIN_EMAIL}")
+            if not verify_password(ADMIN_PASSWORD, admin.password_hash):
+                admin.password_hash = hash_password(ADMIN_PASSWORD)
+            admin.role = UserRole.ADMIN
+            admin.is_active = True
+            logger.info(f"[i] Demo admin verified: {ADMIN_EMAIL}")
 
-        # 2. Ensure Student Demo (STU001) exists
+        # 2. Ensure Student Demo (STU001) exists and has valid credentials
         student = db.query(User).filter(
             (func.lower(User.email) == STUDENT_EMAIL.lower()) | (User.student_id == STUDENT_ID)
         ).first()
@@ -63,13 +67,22 @@ def init_database():
             db.add(student)
             logger.info(f"[+] Demo student created: {STUDENT_EMAIL}")
         else:
-            logger.info(f"[i] Demo student already exists: {STUDENT_EMAIL}")
+            if not verify_password(STUDENT_PASSWORD, student.password_hash):
+                student.password_hash = hash_password(STUDENT_PASSWORD)
+            student.email = STUDENT_EMAIL.lower()
+            student.student_id = STUDENT_ID
+            student.role = UserRole.STUDENT
+            student.is_active = True
+            logger.info(f"[i] Demo student verified: {STUDENT_EMAIL}")
 
         db.commit()
 
         # 3. Safely run dataset seeding if seed script exists
         try:
-            from seed import seed as run_csv_seed
+            try:
+                from seed import seed as run_csv_seed
+            except ImportError:
+                from campusfind.backend.seed import seed as run_csv_seed
             run_csv_seed()
         except Exception as seed_err:
             logger.info(f"[i] CSV seeding step: {seed_err}")
