@@ -3,19 +3,28 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
+from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import engine, Base
+from app.services.init_db import init_database
 
 # Import all models so SQLAlchemy can create tables
 import app.models  # noqa: F401
 
 from app.routes import auth, items, matches, claims, notifications, admin
 
-# Create all tables on startup
-Base.metadata.create_all(bind=engine)
 
-# Ensure upload directory exists
-Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ensure upload directory exists
+    Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+    # Safely initialize database schema & ensure demo users exist
+    try:
+        init_database()
+    except Exception as e:
+        print(f"Startup init error: {e}")
+    yield
+
 
 app = FastAPI(
     title="CampusFind API",
@@ -24,6 +33,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 

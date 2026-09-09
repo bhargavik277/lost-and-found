@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python & backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite
+*.sqlite3
+*.db
+.venv/
+venv/
+ENV/
+uploads/
+.pytest_cache/
+
+# Editor / OS / Nested clones
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+lost-and-found/
+
+.vercel
+.env*
