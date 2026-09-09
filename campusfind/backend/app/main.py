@@ -14,6 +14,11 @@ import app.models  # noqa: F401
 from app.routes import auth, items, matches, claims, notifications, admin
 
 
+# Ensure upload directory exists before mounting StaticFiles
+upload_path = Path(settings.UPLOAD_DIR)
+upload_path.mkdir(parents=True, exist_ok=True)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ensure upload directory exists
@@ -47,7 +52,7 @@ app.add_middleware(
 )
 
 # Serve uploaded files
-app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR, check_dir=False), name="uploads")
 
 # Register routers
 app.include_router(auth.router)
