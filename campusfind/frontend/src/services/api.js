@@ -3,8 +3,20 @@ import axios from 'axios'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/',
   timeout: 15000,
-  headers: { 'Content-Type': 'application/json' },
 })
+
+// Request interceptor — attach token on every outgoing request
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('campusfind_token')
+    if (token) {
+      config.headers = config.headers || {}
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
 
 // Response interceptor — handle 401 globally
 api.interceptors.response.use(
@@ -33,10 +45,8 @@ export const itemsAPI = {
   list: (params) => api.get('/items', { params }),
   get: (id) => api.get(`/items/${id}`),
   myItems: () => api.get('/items/my'),
-  reportLost: (formData) =>
-    api.post('/items/lost', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  reportFound: (formData) =>
-    api.post('/items/found', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  reportLost: (formData) => api.post('/items/lost', formData),
+  reportFound: (formData) => api.post('/items/found', formData),
   update: (id, data) => api.patch(`/items/${id}`, data),
 }
 

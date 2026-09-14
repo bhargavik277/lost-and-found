@@ -69,19 +69,35 @@ export default function ReportFound() {
       setError('Item name is required.')
       return
     }
+    if (!location.trim()) {
+      setError('Location is required.')
+      return
+    }
+    if (!dateReported) {
+      setError('Date found is required.')
+      return
+    }
 
     setLoading(true)
     setError('')
 
     const formData = new FormData()
-    formData.append('item_name', itemName)
+    formData.append('item_name', itemName.trim())
     formData.append('category', category)
-    formData.append('location', location)
+    formData.append('location', location.trim())
     formData.append('date_reported', dateReported)
-    if (timeReported) formData.append('time_reported', timeReported)
-    if (description) formData.append('description', description)
-    if (additionalDetails) formData.append('additional_details', additionalDetails)
-    if (imageFile) formData.append('image', imageFile)
+    if (timeReported && timeReported.trim()) {
+      formData.append('time_reported', timeReported.trim())
+    }
+    if (description && description.trim()) {
+      formData.append('description', description.trim())
+    }
+    if (additionalDetails && additionalDetails.trim()) {
+      formData.append('additional_details', additionalDetails.trim())
+    }
+    if (imageFile) {
+      formData.append('image', imageFile)
+    }
 
     try {
       await itemsAPI.reportFound(formData)
@@ -90,7 +106,18 @@ export default function ReportFound() {
         navigate('/dashboard')
       }, 1500)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to submit report. Please check all fields.')
+      const detail = err.response?.data?.detail
+      let errorMsg = 'Failed to submit report. Please check all fields.'
+      if (typeof detail === 'string') {
+        errorMsg = detail
+      } else if (Array.isArray(detail)) {
+        errorMsg = detail.map((d) => d.msg || `${d.loc?.slice(-1)[0]}: ${d.msg}`).join(', ')
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message
+      } else if (err.message) {
+        errorMsg = err.message
+      }
+      setError(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -135,8 +162,8 @@ export default function ReportFound() {
           <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-3 text-xs text-emerald-300">
             <CheckCircle2 className="w-5 h-5 shrink-0" />
             <div>
-              <div className="font-bold">Found Report Submitted!</div>
-              <div>Matching engine has triggered notifications to lost item owners.</div>
+              <div className="font-bold">Found Report Submitted Successfully!</div>
+              <div>The item has been saved and our matching engine is correlating candidates.</div>
             </div>
           </div>
         )}
@@ -245,7 +272,7 @@ export default function ReportFound() {
                   <button
                     type="button"
                     onClick={() => { setImageFile(null); setImagePreview(null); }}
-                    className="text-xs text-rose-400 hover:underline"
+                    className="text-xs text-rose-400 hover:underline cursor-pointer"
                   >
                     Remove photo
                   </button>

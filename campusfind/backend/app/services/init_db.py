@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, inspect, text
 from app.database import SessionLocal, engine, Base
 import app.models  # noqa: F401 — ensure all models are registered with Base
 from app.models.user import User, UserRole
@@ -23,11 +23,24 @@ def init_database():
     """
     Safely initialize the database:
     1. Create all missing tables in PostgreSQL / SQLite.
-    2. Ensure required demo users (Admin and Student) exist and have correct active credentials.
-    3. Safely seed the dataset items if CSV is available and database is empty.
+    2. Ensure required schema columns exist.
+    3. Ensure required demo users (Admin and Student) exist and have correct active credentials.
+    4. Safely seed the dataset items if CSV is available and database is empty.
     """
     logger.info("[*] Initializing database schema...")
     Base.metadata.create_all(bind=engine)
+
+    # Ensure name_score exists in matches table
+    try:
+        inspector = inspect(engine)
+        if "matches" in inspector.get_table_names():
+            columns = [c["name"] for c in inspector.get_columns("matches")]
+            if "name_score" not in columns:
+                with engine.begin() as conn:
+                    conn.execute(text("ALTER TABLE matches ADD COLUMN name_score FLOAT DEFAULT 0.0"))
+                logger.info("[+] Added name_score column to matches table")
+    except Exception as e:
+        logger.info(f"[i] Schema check: {e}")
 
     db: Session = SessionLocal()
     try:

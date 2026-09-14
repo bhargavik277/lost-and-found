@@ -7,12 +7,10 @@ import {
   Calendar, 
   Clock, 
   Upload, 
-  Tag, 
   AlertCircle, 
   CheckCircle2, 
   ArrowLeft, 
-  Sparkles,
-  Info
+  Sparkles
 } from 'lucide-react'
 
 const CATEGORIES = [
@@ -70,19 +68,35 @@ export default function ReportLost() {
       setError('Item name is required.')
       return
     }
+    if (!location.trim()) {
+      setError('Location is required.')
+      return
+    }
+    if (!dateReported) {
+      setError('Date lost is required.')
+      return
+    }
 
     setLoading(true)
     setError('')
 
     const formData = new FormData()
-    formData.append('item_name', itemName)
+    formData.append('item_name', itemName.trim())
     formData.append('category', category)
-    formData.append('location', location)
+    formData.append('location', location.trim())
     formData.append('date_reported', dateReported)
-    if (timeReported) formData.append('time_reported', timeReported)
-    if (description) formData.append('description', description)
-    if (additionalDetails) formData.append('additional_details', additionalDetails)
-    if (imageFile) formData.append('image', imageFile)
+    if (timeReported && timeReported.trim()) {
+      formData.append('time_reported', timeReported.trim())
+    }
+    if (description && description.trim()) {
+      formData.append('description', description.trim())
+    }
+    if (additionalDetails && additionalDetails.trim()) {
+      formData.append('additional_details', additionalDetails.trim())
+    }
+    if (imageFile) {
+      formData.append('image', imageFile)
+    }
 
     try {
       await itemsAPI.reportLost(formData)
@@ -91,7 +105,18 @@ export default function ReportLost() {
         navigate('/matches')
       }, 1500)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to submit report. Please check all fields.')
+      const detail = err.response?.data?.detail
+      let errorMsg = 'Failed to submit report. Please check all fields.'
+      if (typeof detail === 'string') {
+        errorMsg = detail
+      } else if (Array.isArray(detail)) {
+        errorMsg = detail.map((d) => d.msg || `${d.loc?.slice(-1)[0]}: ${d.msg}`).join(', ')
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message
+      } else if (err.message) {
+        errorMsg = err.message
+      }
+      setError(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -238,7 +263,7 @@ export default function ReportLost() {
                   <button
                     type="button"
                     onClick={() => { setImageFile(null); setImagePreview(null); }}
-                    className="text-xs text-rose-400 hover:underline"
+                    className="text-xs text-rose-400 hover:underline cursor-pointer"
                   >
                     Remove photo
                   </button>

@@ -17,17 +17,27 @@ class ItemCreate(BaseModel):
 
     @field_validator("item_name")
     @classmethod
-    def item_name_not_empty(cls, v):
-        if not v.strip():
+    def item_name_not_empty(cls, v: str) -> str:
+        if not v or not v.strip():
             raise ValueError("Item name cannot be empty")
         return v.strip()
 
     @field_validator("location")
     @classmethod
-    def location_not_empty(cls, v):
-        if not v.strip():
+    def location_not_empty(cls, v: str) -> str:
+        if not v or not v.strip():
             raise ValueError("Location cannot be empty")
         return v.strip()
+
+    @field_validator("description", "time_reported", "additional_details", mode="before")
+    @classmethod
+    def sanitize_optional_strings(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            trimmed = v.strip()
+            return trimmed if trimmed else None
+        return v
 
 
 class ItemUpdate(BaseModel):
