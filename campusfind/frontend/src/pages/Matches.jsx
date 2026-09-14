@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 import { matchesAPI } from '../services/api'
 import MatchCard from '../components/MatchCard'
 import ClaimModal from '../components/ClaimModal'
-import { Sparkles, ArrowLeft, Filter, AlertCircle, Info } from 'lucide-react'
+import { Sparkles, ArrowLeft, Info } from 'lucide-react'
 
 export default function Matches() {
   const [matches, setMatches] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('ALL') // ALL, STRONG, MODERATE
+  const [filter, setFilter] = useState('ALL') // ALL, STRONG, POSSIBLE
   const [selectedClaimItem, setSelectedClaimItem] = useState(null)
 
   const fetchMatches = async () => {
@@ -28,8 +28,8 @@ export default function Matches() {
   }, [])
 
   const filteredMatches = matches.filter(m => {
-    if (filter === 'STRONG') return m.match_score >= 70
-    if (filter === 'MODERATE') return m.match_score >= 50 && m.match_score < 70
+    if (filter === 'STRONG') return m.match_score >= 80
+    if (filter === 'POSSIBLE') return m.match_score >= 60 && m.match_score < 80
     return true
   })
 
@@ -43,11 +43,11 @@ export default function Matches() {
       <div className="card bg-gradient-to-r from-navy-800 via-indigo-950/30 to-navy-800 border-slate-700 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold mb-2 border border-amber-500/30">
-            <Sparkles className="w-3.5 h-3.5" /> TF-IDF AI Matching Radar
+            <Sparkles className="w-3.5 h-3.5" /> Semantic Item Matching Radar
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Smart Match Radar</h1>
           <p className="text-xs text-slate-400 mt-1 max-w-xl">
-            Our multi-parameter engine correlates Category (30%), Location Zone (25%), Text Similarity (25%), and Date Proximity (20%) to identify potential recoveries for your lost items.
+            Our multi-parameter engine correlates Item Identity (30%), Category (20%), Location Zone (20%), Description (20%), and Chronological Proximity (10%) to identify potential recoveries.
           </p>
         </div>
 
@@ -55,21 +55,21 @@ export default function Matches() {
         <div className="flex bg-slate-850 p-1 rounded-xl border border-slate-750 text-xs">
           <button
             onClick={() => setFilter('ALL')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${filter === 'ALL' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${filter === 'ALL' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
           >
             All Leads ({matches.length})
           </button>
           <button
             onClick={() => setFilter('STRONG')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${filter === 'STRONG' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${filter === 'STRONG' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
           >
-            High Match ≥70% ({matches.filter(m => m.match_score >= 70).length})
+            Strong Match ≥80% ({matches.filter(m => m.match_score >= 80).length})
           </button>
           <button
-            onClick={() => setFilter('MODERATE')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${filter === 'MODERATE' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => setFilter('POSSIBLE')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${filter === 'POSSIBLE' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'}`}
           >
-            Possible 50-70% ({matches.filter(m => m.match_score >= 50 && m.match_score < 70).length})
+            Possible 60–79% ({matches.filter(m => m.match_score >= 60 && m.match_score < 80).length})
           </button>
         </div>
       </div>
@@ -78,7 +78,7 @@ export default function Matches() {
       <div className="p-3.5 rounded-xl bg-slate-850 border border-slate-750 flex items-center gap-2.5 text-xs text-slate-300">
         <Info className="w-4 h-4 text-indigo-400 shrink-0" />
         <span>
-          <strong>Important Security Protocol:</strong> A high match score does not automatically approve ownership. When you find your item, click <strong>"Claim This Item"</strong> to submit confidential verification details for admin approval.
+          <strong>Important Security Protocol:</strong> A match score does not automatically approve ownership. When you find your item, click <strong>"Claim This Item"</strong> to submit verification details for admin approval.
         </span>
       </div>
 

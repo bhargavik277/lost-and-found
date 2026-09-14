@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Sparkles, MapPin, Calendar, Tag, ShieldCheck, CheckCircle2, XCircle, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react'
+import { Sparkles, MapPin, Calendar, ShieldCheck, CheckCircle2, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
 export default function MatchCard({ match, onClaim, onStatusUpdate }) {
   const [expanded, setExpanded] = useState(false)
@@ -9,20 +9,30 @@ export default function MatchCard({ match, onClaim, onStatusUpdate }) {
   if (!lost || !found) return null
 
   const score = Math.round(match.match_score)
-  const isStrong = score >= 70
-  const isMedium = score >= 50 && score < 70
+  const isStrong = score >= 80
+  const isPossible = score >= 60 && score < 80
+  const isWeak = score >= 40 && score < 60
 
   const getScoreColor = () => {
     if (isStrong) return 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10'
-    if (isMedium) return 'text-amber-400 border-amber-500/40 bg-amber-500/10'
-    return 'text-indigo-400 border-indigo-500/40 bg-indigo-500/10'
+    if (isPossible) return 'text-sky-400 border-sky-500/40 bg-sky-500/10'
+    if (isWeak) return 'text-amber-400 border-amber-500/40 bg-amber-500/10'
+    return 'text-slate-400 border-slate-600/40 bg-slate-700/10'
   }
 
   const getProgressColor = (val, max) => {
-    const pct = val / max
+    const pct = max > 0 ? val / max : 0
     if (pct >= 0.8) return 'bg-emerald-500'
-    if (pct >= 0.5) return 'bg-amber-500'
-    return 'bg-indigo-500'
+    if (pct >= 0.5) return 'bg-sky-500'
+    if (pct >= 0.3) return 'bg-amber-500'
+    return 'bg-slate-500'
+  }
+
+  const getMatchLabel = () => {
+    if (isStrong) return '🌟 Strong Match'
+    if (isPossible) return '⚡ Possible Match'
+    if (isWeak) return '🔍 Weak Match'
+    return '⚠️ Low Match'
   }
 
   return (
@@ -36,7 +46,7 @@ export default function MatchCard({ match, onClaim, onStatusUpdate }) {
           </div>
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              {isStrong ? '🌟 High Confidence Match' : isMedium ? '⚡ Possible Match' : '🔍 Potential Lead'}
+              {getMatchLabel()}
             </div>
             <div className="text-sm font-bold text-white">
               '{lost.item_name}' ⇄ '{found.item_name}'
@@ -46,7 +56,7 @@ export default function MatchCard({ match, onClaim, onStatusUpdate }) {
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
-          {found.status !== 'RETURNED' && found.status !== 'CLAIMED' && (
+          {score >= 40 && found.status !== 'RETURNED' && found.status !== 'CLAIMED' && (
             <button
               onClick={() => onClaim(found)}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
@@ -56,7 +66,7 @@ export default function MatchCard({ match, onClaim, onStatusUpdate }) {
           )}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition-colors flex items-center gap-1"
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition-colors flex items-center gap-1 cursor-pointer"
           >
             <span>{expanded ? 'Hide Analysis' : 'Explain Match'}</span>
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -83,7 +93,7 @@ export default function MatchCard({ match, onClaim, onStatusUpdate }) {
               <MapPin className="w-3.5 h-3.5 text-indigo-400" /> {lost.location}
             </span>
             <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" /> {lost.date_reported}
+              <Calendar className="w-3.5 h-3.5 text-slate-400" /> Lost: {lost.date_reported}
             </span>
           </div>
         </div>
@@ -105,107 +115,131 @@ export default function MatchCard({ match, onClaim, onStatusUpdate }) {
               <MapPin className="w-3.5 h-3.5 text-emerald-400" /> {found.location}
             </span>
             <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" /> {found.date_reported}
+              <Calendar className="w-3.5 h-3.5 text-slate-400" /> Found: {found.date_reported}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Explainability Breakdown (Expandable or default preview) */}
+      {/* 5-Component Explainability Breakdown */}
       <div className="pt-3 border-t border-slate-700/60">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          {/* Category */}
-          <div className="p-2.5 rounded-xl bg-slate-850 border border-slate-750">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
+          {/* Item Name Semantic Sim */}
+          <div className="p-2 rounded-xl bg-slate-850 border border-slate-750">
             <div className="flex justify-between text-slate-400 mb-1">
-              <span>Category</span>
-              <span className="font-bold text-white">{Math.round(match.category_score)}/30</span>
+              <span>Item Identity</span>
+              <span className="font-bold text-white">{Math.round(match.name_score ?? 0)}/30</span>
             </div>
             <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
               <div
-                className={`h-full ${getProgressColor(match.category_score, 30)}`}
-                style={{ width: `${(match.category_score / 30) * 100}%` }}
+                className={`h-full ${getProgressColor(match.name_score ?? 0, 30)}`}
+                style={{ width: `${((match.name_score ?? 0) / 30) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Category */}
+          <div className="p-2 rounded-xl bg-slate-850 border border-slate-750">
+            <div className="flex justify-between text-slate-400 mb-1">
+              <span>Category</span>
+              <span className="font-bold text-white">{Math.round(match.category_score)}/20</span>
+            </div>
+            <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+              <div
+                className={`h-full ${getProgressColor(match.category_score, 20)}`}
+                style={{ width: `${(match.category_score / 20) * 100}%` }}
               ></div>
             </div>
           </div>
 
           {/* Location */}
-          <div className="p-2.5 rounded-xl bg-slate-850 border border-slate-750">
+          <div className="p-2 rounded-xl bg-slate-850 border border-slate-750">
             <div className="flex justify-between text-slate-400 mb-1">
               <span>Location</span>
-              <span className="font-bold text-white">{Math.round(match.location_score)}/25</span>
+              <span className="font-bold text-white">{Math.round(match.location_score)}/20</span>
             </div>
             <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
               <div
-                className={`h-full ${getProgressColor(match.location_score, 25)}`}
-                style={{ width: `${(match.location_score / 25) * 100}%` }}
+                className={`h-full ${getProgressColor(match.location_score, 20)}`}
+                style={{ width: `${(match.location_score / 20) * 100}%` }}
               ></div>
             </div>
           </div>
 
           {/* Description */}
-          <div className="p-2.5 rounded-xl bg-slate-850 border border-slate-750">
+          <div className="p-2 rounded-xl bg-slate-850 border border-slate-750">
             <div className="flex justify-between text-slate-400 mb-1">
               <span>Description</span>
-              <span className="font-bold text-white">{Math.round(match.description_score)}/25</span>
+              <span className="font-bold text-white">{Math.round(match.description_score)}/20</span>
             </div>
             <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
               <div
-                className={`h-full ${getProgressColor(match.description_score, 25)}`}
-                style={{ width: `${(match.description_score / 25) * 100}%` }}
+                className={`h-full ${getProgressColor(match.description_score, 20)}`}
+                style={{ width: `${(match.description_score / 20) * 100}%` }}
               ></div>
             </div>
           </div>
 
-          {/* Date */}
-          <div className="p-2.5 rounded-xl bg-slate-850 border border-slate-750">
+          {/* Date Proximity */}
+          <div className="p-2 rounded-xl bg-slate-850 border border-slate-750">
             <div className="flex justify-between text-slate-400 mb-1">
               <span>Date Proximity</span>
-              <span className="font-bold text-white">{Math.round(match.date_score)}/20</span>
+              <span className="font-bold text-white">{Math.round(match.date_score)}/10</span>
             </div>
             <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
               <div
-                className={`h-full ${getProgressColor(match.date_score, 20)}`}
-                style={{ width: `${(match.date_score / 20) * 100}%` }}
+                className={`h-full ${getProgressColor(match.date_score, 10)}`}
+                style={{ width: `${(match.date_score / 10) * 100}%` }}
               ></div>
             </div>
           </div>
         </div>
 
-        {/* Detailed Explanation Pills */}
+        {/* Detailed Explanation */}
         {expanded && (
           <div className="mt-4 p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/20 space-y-2 text-xs">
             <h5 className="font-bold text-indigo-300">Why was this match suggested?</h5>
             <ul className="space-y-1.5 text-slate-300">
               <li className="flex items-center gap-2">
-                {match.category_score >= 25 ? (
+                {(match.name_score ?? 0) >= 15 ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 ) : (
                   <XCircle className="w-4 h-4 text-amber-400 shrink-0" />
                 )}
                 <span>
-                  <strong>Category match:</strong> Both items categorized as "{lost.category}"
+                  <strong>Item Semantic Identity (30%):</strong> '{lost.item_name}' ↔ '{found.item_name}' scored {Math.round(match.name_score ?? 0)}/30 pts.
                 </span>
               </li>
               <li className="flex items-center gap-2">
-                {match.location_score >= 20 ? (
+                {match.category_score >= 18 ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                )}
+                <span>
+                  <strong>Category match (20%):</strong> Both items categorized as "{lost.category}".
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                {match.location_score >= 16 ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 ) : (
                   <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
                 )}
                 <span>
-                  <strong>Location zone:</strong> Lost at "{lost.location}" vs found at "{found.location}"
+                  <strong>Location zone (20%):</strong> Lost at "{lost.location}" vs found at "{found.location}".
                 </span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>
-                  <strong>TF-IDF text similarity:</strong> Keywords and naming patterns matched with {Math.round((match.description_score / 25) * 100)}% text alignment.
+                  <strong>Description & keywords (20%):</strong> Text alignment scored {Math.round(match.description_score)}/20 pts.
                 </span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>
-                  <strong>Date proximity:</strong> Reported within temporal range of each other.
+                  <strong>Date proximity & validity (10%):</strong> Reported chronologically consistent ({lost.date_reported} → {found.date_reported}).
                 </span>
               </li>
             </ul>

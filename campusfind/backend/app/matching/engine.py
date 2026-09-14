@@ -4,8 +4,10 @@ CampusFind Smart Matching Engine
 When a LOST item is submitted → compares against FOUND items.
 When a FOUND item is submitted → compares against LOST items.
 
-Modular design: swap scorer/similarity modules to upgrade from TF-IDF
-to sentence embeddings without changing this orchestrator.
+Executes a 3-stage validation pipeline:
+1. Hard Chronological Filter (found_date >= lost_date)
+2. Hard Incompatible Item Type Filter
+3. 5-Component Weighted Matching
 """
 from typing import List
 from uuid import UUID
@@ -56,6 +58,7 @@ def run_matching(new_item: Item, db: Session) -> List[Match]:
 
         breakdown = calculate_score(lost_item, found_item)
 
+        # Skip if invalid chronology, incompatible type, or below threshold
         if not breakdown.meets_threshold:
             continue
 
@@ -64,6 +67,7 @@ def run_matching(new_item: Item, db: Session) -> List[Match]:
             lost_item_id=lost_item.id,
             found_item_id=found_item.id,
             match_score=breakdown.total_score,
+            name_score=breakdown.name_score,
             category_score=breakdown.category_score,
             location_score=breakdown.location_score,
             description_score=breakdown.description_score,
@@ -96,7 +100,13 @@ def _notify_match(
     score: float,
 ) -> None:
     """Notify the reporter of the lost item about a possible match."""
-    strength = "strong" if score >= 70 else "possible"
+    if score >= 80:
+        strength = "strong"
+    elif score >= 60:
+        strength = "possible"
+    else:
+        strength = "potential"
+
     create_notification(
         db,
         user_id=lost_item.reported_by,

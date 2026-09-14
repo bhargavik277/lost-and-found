@@ -11,10 +11,11 @@ class MatchOut(BaseModel):
     lost_item_id: UUID
     found_item_id: UUID
     match_score: float
-    category_score: float
-    location_score: float
-    description_score: float
-    date_score: float
+    name_score: float = 0.0
+    category_score: float = 0.0
+    location_score: float = 0.0
+    description_score: float = 0.0
+    date_score: float = 0.0
     status: MatchStatus
     created_at: datetime
     lost_item: Optional[ItemOut] = None

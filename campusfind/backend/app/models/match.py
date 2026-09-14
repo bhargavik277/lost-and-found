@@ -19,12 +19,13 @@ class Match(Base):
     lost_item_id = Column(Uuid(as_uuid=True), ForeignKey("items.id"), nullable=False)
     found_item_id = Column(Uuid(as_uuid=True), ForeignKey("items.id"), nullable=False)
 
-    # Weighted scores (0.0 - 1.0 scale, then multiply by weight for display)
+    # Weighted scores (0.0 - 100.0 scale)
     match_score = Column(Float, nullable=False)       # overall 0-100
-    category_score = Column(Float, default=0.0)       # 0-30
-    location_score = Column(Float, default=0.0)       # 0-25
-    description_score = Column(Float, default=0.0)    # 0-25
-    date_score = Column(Float, default=0.0)            # 0-20
+    name_score = Column(Float, default=0.0)           # 0-30
+    category_score = Column(Float, default=0.0)       # 0-20
+    location_score = Column(Float, default=0.0)       # 0-20
+    description_score = Column(Float, default=0.0)    # 0-20
+    date_score = Column(Float, default=0.0)            # 0-10
 
     status = Column(Enum(MatchStatus, native_enum=False), default=MatchStatus.SUGGESTED, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
