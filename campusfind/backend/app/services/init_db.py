@@ -1,8 +1,10 @@
 import logging
+import sys
 from pathlib import Path
 from sqlalchemy.orm import Session
 from sqlalchemy import func, inspect, text
 from app.database import SessionLocal, engine, Base
+import app.models.timeline  # ensure ItemTimeline is registered
 import app.models  # noqa: F401 — ensure all models are registered with Base
 from app.models.user import User, UserRole
 from app.services.auth_service import hash_password, verify_password
@@ -19,6 +21,72 @@ STUDENT_PASSWORD = "STU001"
 STUDENT_NAME = "Student STU001"
 
 
+def _is_postgres() -> bool:
+    """Returns True if the connected database dialect is PostgreSQL."""
+    return engine.dialect.name == "postgresql"
+
+
+def _migrate_item_timelines(inspector):
+    """
+    Safely migrate item_timelines UUID columns.
+    In PostgreSQL: if id/item_id/actor_id are VARCHAR instead of UUID, convert them.
+    In SQLite: no-op (SQLite has no native UUID type; SQLAlchemy stores as VARCHAR).
+    Data is preserved; no rows are deleted.
+    """
+    if "item_timelines" not in inspector.get_table_names():
+        logger.info("[i] item_timelines table not yet created; will be created by create_all()")
+        return
+
+    if not _is_postgres():
+        logger.info("[i] Non-PostgreSQL database; skipping item_timelines UUID migration")
+        return
+
+    cols = {c["name"]: c for c in inspector.get_columns("item_timelines")}
+    uuid_cols = ["id", "item_id", "actor_id"]
+    needs_migration = []
+
+    for col_name in uuid_cols:
+        if col_name not in cols:
+            continue
+        col_type = str(cols[col_name]["type"]).upper()
+        if "UUID" not in col_type:
+            needs_migration.append(col_name)
+
+    if not needs_migration:
+        logger.info("[i] item_timelines UUID columns are already correct")
+        return
+
+    logger.info(f"[*] Migrating item_timelines columns to UUID type: {needs_migration}")
+    try:
+        with engine.begin() as conn:
+            for col_name in needs_migration:
+                if col_name == "id":
+                    # id is PK — alter type using USING cast
+                    conn.execute(text(
+                        "ALTER TABLE item_timelines "
+                        "ALTER COLUMN id TYPE UUID USING id::UUID"
+                    ))
+                    logger.info("[+] item_timelines.id converted to UUID")
+                elif col_name == "item_id":
+                    conn.execute(text(
+                        "ALTER TABLE item_timelines "
+                        "ALTER COLUMN item_id TYPE UUID USING item_id::UUID"
+                    ))
+                    logger.info("[+] item_timelines.item_id converted to UUID")
+                elif col_name == "actor_id":
+                    conn.execute(text(
+                        "ALTER TABLE item_timelines "
+                        "ALTER COLUMN actor_id TYPE UUID USING actor_id::UUID"
+                    ))
+                    logger.info("[+] item_timelines.actor_id converted to UUID")
+    except Exception as e:
+        logger.error(
+            f"[-] item_timelines UUID migration failed. "
+            f"If the table has incompatible data, manual migration may be required. "
+            f"Error: {e}"
+        )
+
+
 def init_database():
     """
     Safely initialize the database:
@@ -30,10 +98,14 @@ def init_database():
     logger.info("[*] Initializing database schema...")
     Base.metadata.create_all(bind=engine)
 
-    # Ensure schema migrations for matches and claims
     try:
         inspector = inspect(engine)
         tables = inspector.get_table_names()
+
+        # -- item_timelines UUID type migration (PostgreSQL only)
+        _migrate_item_timelines(inspector)
+
+        # -- matches: add name_score column if missing
         if "matches" in tables:
             columns = [c["name"] for c in inspector.get_columns("matches")]
             if "name_score" not in columns:
@@ -41,6 +113,7 @@ def init_database():
                     conn.execute(text("ALTER TABLE matches ADD COLUMN name_score FLOAT DEFAULT 0.0"))
                 logger.info("[+] Added name_score column to matches table")
 
+        # -- claims: add OTP and proof_image columns if missing
         if "claims" in tables:
             claim_cols = [c["name"] for c in inspector.get_columns("claims")]
             with engine.begin() as conn:
@@ -60,8 +133,7 @@ def init_database():
                     conn.execute(text("ALTER TABLE claims ADD COLUMN is_otp_used BOOLEAN DEFAULT 0"))
                     logger.info("[+] Added is_otp_used column to claims table")
     except Exception as e:
-        logger.info(f"[i] Schema check: {e}")
-
+        logger.warning(f"[!] Schema migration step encountered an issue: {e}")
 
     db: Session = SessionLocal()
     try:
@@ -112,19 +184,36 @@ def init_database():
         db.commit()
 
         # 3. Safely run dataset seeding if seed script exists and items table is empty
-        try:
-            from app.models.item import Item
-            if db.query(Item).count() == 0:
-                try:
-                    from seed import seed as run_csv_seed
-                except ImportError:
-                    from campusfind.backend.seed import seed as run_csv_seed
+        from app.models.item import Item
+        if db.query(Item).count() == 0:
+            logger.info("[*] Items table is empty — attempting CSV dataset seed...")
+            try:
+                # Ensure seed.py's directory (backend/) is on sys.path so it can import app.*
+                backend_dir = str(Path(__file__).resolve().parent.parent.parent)
+                if backend_dir not in sys.path:
+                    sys.path.insert(0, backend_dir)
+                from seed import seed as run_csv_seed  # noqa: PLC0415
                 run_csv_seed()
-        except Exception as seed_err:
-            logger.info(f"[i] CSV seeding step: {seed_err}")
+                logger.info("[+] CSV dataset seed completed successfully")
+            except ImportError as e:
+                logger.error(
+                    f"[-] CSV seed module not found: {e}. "
+                    "Ensure seed.py is present in the backend directory on Render."
+                )
+            except FileNotFoundError as e:
+                logger.error(
+                    f"[-] CSV dataset file not found during seeding: {e}. "
+                    "Ensure the data/ directory and CSV file are deployed alongside the backend."
+                )
+            except Exception as e:
+                logger.error(f"[-] CSV seeding failed with unexpected error: {e}")
+        else:
+            logger.info("[i] Items table already populated — skipping CSV seed")
 
     except Exception as e:
         db.rollback()
         logger.error(f"[-] Error during database initialization: {e}")
     finally:
         db.close()
+
+

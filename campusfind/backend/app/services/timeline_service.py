@@ -1,5 +1,6 @@
 import logging
-from typing import Optional
+import uuid as _uuid_mod
+from typing import Optional, Union
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
@@ -8,11 +9,23 @@ from app.models.timeline import ItemTimeline
 logger = logging.getLogger("campusfind.timeline")
 
 
+def _to_uuid(val) -> Optional[UUID]:
+    """Coerce str or UUID to a UUID object; returns None if val is None."""
+    if val is None:
+        return None
+    if isinstance(val, UUID):
+        return val
+    try:
+        return _uuid_mod.UUID(str(val))
+    except (ValueError, AttributeError):
+        return None
+
+
 def record_timeline_event(
     db: Session,
-    item_id: UUID,
+    item_id: Union[UUID, str],
     status: str,
-    actor_id: Optional[UUID] = None,
+    actor_id: Optional[Union[UUID, str]] = None,
     actor_role: Optional[str] = None,
     actor_name: Optional[str] = None,
     note: Optional[str] = None,
@@ -20,9 +33,9 @@ def record_timeline_event(
     """Safely records a chain of custody / recovery lifecycle transition event."""
     try:
         event = ItemTimeline(
-            item_id=item_id,
+            item_id=_to_uuid(item_id),
             status=status,
-            actor_id=actor_id,
+            actor_id=_to_uuid(actor_id),
             actor_role=actor_role,
             actor_name=actor_name,
             note=note,
@@ -34,3 +47,4 @@ def record_timeline_event(
     except Exception as e:
         logger.error(f"Failed to record timeline event for item {item_id}: {e}")
         return None
+

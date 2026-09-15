@@ -19,14 +19,21 @@ import {
 export default function AdminDashboard() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const res = await adminAPI.analytics()
         setData(res.data)
-      } catch {
-        // ignore
+        setFetchError(null)
+      } catch (err) {
+        console.error('[AdminDashboard] Failed to load analytics:', err?.response?.status, err?.message)
+        setFetchError(
+          err?.response?.status === 401
+            ? 'Session expired. Please log in again.'
+            : 'Failed to load analytics data. The server may be unavailable.'
+        )
       } finally {
         setLoading(false)
       }
@@ -37,6 +44,13 @@ export default function AdminDashboard() {
   const kpis = data?.kpis || {}
 
   return (
+    <>
+    {fetchError && (
+      <div className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+        <AlertTriangle className="w-4 h-4 shrink-0" />
+        <span>{fetchError}</span>
+      </div>
+    )}
     <div className="space-y-8 animate-fade-in pb-16">
       {/* Header Banner */}
       <div className="card bg-gradient-to-r from-navy-800 via-indigo-950/40 to-navy-800 border-slate-700 p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -196,5 +210,6 @@ export default function AdminDashboard() {
         </div>
       )}
     </div>
+    </>
   )
 }
