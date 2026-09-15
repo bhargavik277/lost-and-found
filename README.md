@@ -1,192 +1,212 @@
-from pathlib import Path
+CampusFind — Smart College Lost & Found Management System
 
-readme = r"""# CampusFind — Smart College Lost & Found Management System
-
-> **Lost. Found. Reconnected.**
+Lost. Found. Reconnected.
 
 CampusFind is a smart college lost-and-found management system designed to make reporting, matching, claiming, verification, and collection of lost items easier and more secure.
 
 The system connects students, administrators, and the Main Security Desk through a single platform. It uses a weighted smart-matching approach to identify potentially related lost and found reports while keeping final claim approval under administrative control.
 
----
-
-## 📌 Problem Statement
+📌 Problem Statement
 
 In colleges, lost items are often reported through informal channels such as WhatsApp groups, classroom messages, notice boards, or word of mouth. This makes it difficult to:
 
-- Find relevant lost or found reports quickly
-- Match a lost item with the correct found item
-- Track the status of a report or claim
-- Verify ownership safely
-- Coordinate item collection
-- Maintain a proper record of recovered items
+Find relevant lost or found reports quickly
+
+Match a lost item with the correct found item
+
+Track the status of a report or claim
+
+Verify ownership safely
+
+Coordinate item collection
+
+Maintain a proper record of recovered items
 
 CampusFind provides a centralized and structured solution for the complete lost-and-found process.
 
----
+💡 Proposed Solution
 
-## 💡 Proposed Solution
+Students report lost or found items.
 
-CampusFind provides a digital platform where:
+The system searches for potential matches.
 
-1. Students report lost or found items.
-2. The system searches for potential matches.
-3. A smart matching engine calculates compatibility using item, category, location, description, and date information.
-4. Students can submit claims for matched items.
-5. Administrators review the claim and supporting evidence.
-6. Approved claims generate a secure Collection OTP.
-7. The student receives the OTP and collection instructions.
-8. The Main Security Desk receives a collection notification.
-9. Security staff verifies the OTP.
-10. The item is marked as **RETURNED** after successful verification.
+A smart matching engine calculates compatibility using item, category, location, description, and date information.
 
----
+Students can submit claims for matched items.
 
-## ✨ Key Features
+Administrators review the claim and supporting evidence.
 
-### 👨‍🎓 Student Features
+Approved claims generate a secure Collection OTP.
 
-- Student registration and login
-- Report a lost item
-- Report a found item
-- Add item details, location, date, time, category, and description
-- Upload item images where applicable
-- View personal reports
-- View potential matches
-- Submit claims
-- Provide ownership evidence
-- Receive claim-status notifications
-- Receive Collection OTP after approval
-- Track the collection process
+The student receives the OTP and collection instructions.
 
-### 🛡️ Admin Features
+The Main Security Desk receives a collection notification.
 
-- Secure admin login
-- View and manage lost/found reports
-- Review AI-assisted matches
-- Review claim details and ownership evidence
-- View match score and score breakdown
-- Approve or reject claims
-- Automatically initiate the collection workflow after approval
-- Delete duplicate or invalid reports
-- View analytics
-- Monitor system activity and timelines
+Security staff verifies the OTP.
 
-### 🔐 Security Desk Features
+The item is marked as RETURNED after successful verification.
 
-- Dedicated Security Desk access
-- View pending item collections
-- Receive collection notifications
-- View claimant and item information
-- Verify Collection OTP
-- Complete the handover process
-- View completed collections
-- Prevent reuse of an already-used or expired OTP
+✨ Key Features
 
----
+👨‍🎓 Student
 
-## 🤖 Smart Matching System
+Student registration and login
 
-CampusFind uses a weighted matching approach rather than relying only on exact item-name matching.
+Report lost and found items
 
-### Matching Weights
+Add item details, location, date, time, category, and description
 
-| Matching Factor | Weight |
-|---|---:|
-| Item / Name Similarity | 30% |
-| Category | 20% |
-| Location | 20% |
-| Description | 20% |
-| Date Proximity | 10% |
-| **Total** | **100%** |
+Upload item images where applicable
 
-### Match Categories
+View personal reports and potential matches
 
-| Score | Result |
-|---:|---|
-| 80–100% | Strong Match |
-| 60–79% | Possible Match |
-| 40–59% | Weak Match |
-| 0–39% | Low Match |
+Submit claims and ownership evidence
 
-### Hard Validation Rules
+Receive claim-status notifications
 
-The system also prevents obviously invalid matches.
+Receive Collection OTP after approval
 
-#### 1. Chronology Validation
+Track collection status
 
-A found item cannot be matched to a lost report when:
+🛡️ Admin
 
-`Found Date < Lost Date`
+Secure admin login
 
-Such a case is rejected as:
+Manage lost/found reports
 
-**INVALID — Impossible Chronology**
+Review AI-assisted matches
 
-#### 2. Incompatible Item Types
+Review claim details and ownership evidence
 
-Clearly incompatible item types are rejected instead of being presented as misleading matches.
+View match score and score breakdown
 
-For example:
+Approve or reject claims
 
-- Earphones ↔ Mobile Phone → Invalid
-- Earphones ↔ USB Drive → Invalid
+Initiate collection workflow automatically after approval
 
-This improves the reliability of the matching process.
+Delete duplicate or invalid reports
 
----
+View analytics
 
-## 🔄 Complete System Workflow
+Monitor timelines and system activity
 
-```text
-                 ┌─────────────────────┐
-                 │       Student       │
-                 └──────────┬──────────┘
-                            │
-                    Report Lost / Found
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │    Smart Matching   │
-                 │       Engine        │
-                 └──────────┬──────────┘
-                            │
-                     Potential Match
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │   Claim Submitted   │
-                 └──────────┬──────────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │   Admin Review      │
-                 │ Evidence + Match    │
-                 └──────────┬──────────┘
-                            │
-                    Approve / Reject
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │ Collection OTP      │
-                 │     Generated       │
-                 └───────┬─────┬───────┘
-                         │     │
-                  Student     Security Desk
-                         │     │
-                         ▼     ▼
-                    OTP Verification
-                         │
-                         ▼
-                 ┌─────────────────────┐
-                 │  Item Returned      │
-                 │  Status = RETURNED  │
-                 └─────────────────────┘
+🔐 Security Desk
+
+Dedicated Security Desk access
+
+View pending collections
+
+Receive collection notifications
+
+View claimant and item information
+
+Verify Collection OTP
+
+Complete item handover
+
+View completed collections
+
+Prevent reuse of expired or already-used OTPs
+
+🤖 Smart Matching System
+
+CampusFind uses a weighted matching approach instead of relying only on exact item-name matching.
+
+Matching Factor
+
+Weight
+
+Item / Name Similarity
+
+30%
+
+Category
+
+20%
+
+Location
+
+20%
+
+Description
+
+20%
+
+Date Proximity
+
+10%
+
+Total
+
+100%
+
+Match Categories
+
+Score
+
+Result
+
+80–100%
+
+Strong Match
+
+60–79%
+
+Possible Match
+
+40–59%
+
+Weak Match
+
+0–39%
+
+Low Match
+
+Validation Rules
+
+Chronology: A found item cannot match a lost report when the found date is earlier than the lost date. Such cases are marked INVALID — Impossible Chronology.
+
+Incompatible item types: Clearly incompatible item types are rejected, reducing misleading matches. For example, earphones and mobile phones are not treated as a valid match merely because they are reported at similar locations.
+
+🔄 Complete System Workflow
+
+Student
+   │
+   ├── Report Lost / Found
+   │
+   ▼
+Smart Matching Engine
+   │
+   ▼
+Potential Match
+   │
+   ▼
+Claim Submitted
+   │
+   ▼
+Admin Review
+   │
+   ├── Reject
+   │
+   └── Approve
+          │
+          ▼
+   Collection OTP Generated
+          │
+       ┌──┴──┐
+       ▼     ▼
+    Student  Security Desk
+       │     │
+       └──┬──┘
+          ▼
+     OTP Verification
+          │
+          ▼
+      Item Returned
+
 🔐 Claim & OTP Verification
 
 CampusFind does not automatically approve a claim only because the matching score is high.
-
-The claim follows a controlled verification process:
 
 Lost Report
      ↓
@@ -208,28 +228,43 @@ OTP Verification
      ↓
 Item Returned
 
-The Collection OTP is intended to verify the handover at the Main Security Desk.
+The backend validates the claim status, OTP existence, expiration, usage status, correctness, and item return status.
 
-The backend validates:
+After successful verification:
 
-Claim status
-OTP existence
-OTP expiration
-OTP usage status
-OTP correctness
-Item return status
+OTP is marked as used
 
-After successful verification, the item is marked as returned and the collection event is recorded in the timeline.
+Item status becomes RETURNED
+
+Item is marked recovered
+
+Collection is recorded in the timeline
+
+Relevant notifications are generated
 
 👥 User Roles
-Role	Main Responsibilities
-STUDENT	Report items, view matches, submit claims, receive OTP
-ADMIN	Manage reports, review claims, approve/reject, monitor analytics
-SECURITY	Verify OTP and complete item collection
+
+Role
+
+Responsibilities
+
+STUDENT
+
+Report items, view matches, submit claims, receive OTP
+
+ADMIN
+
+Manage reports, review claims, approve/reject, monitor analytics
+
+SECURITY
+
+Verify OTP and complete item collection
+
 🏗️ Technical Architecture
+
 ┌──────────────────────────────────────────────┐
-│                 Frontend                     │
-│          React + Vite + Tailwind             │
+│                  Frontend                    │
+│            React + Vite + Tailwind           │
 │                                              │
 │ Student Dashboard | Admin | Security Desk    │
 └──────────────────────┬───────────────────────┘
@@ -237,54 +272,85 @@ SECURITY	Verify OTP and complete item collection
                        ▼
 ┌──────────────────────────────────────────────┐
 │                  Backend                     │
-│                FastAPI                      │
+│                   FastAPI                    │
 │                                              │
-│ Authentication | Reports | Claims           │
-│ Matching       | Notifications | Analytics  │
-│ Timeline       | OTP Verification            │
+│ Authentication | Reports | Claims            │
+│ Matching       | Notifications | Analytics   │
+│ Timeline       | OTP Verification             │
 └──────────────────────┬───────────────────────┘
                        │ SQLAlchemy
                        ▼
 ┌──────────────────────────────────────────────┐
-│                 Database                     │
-│        PostgreSQL (Production)               │
-│        SQLite (Local Development)            │
+│                  Database                    │
+│       PostgreSQL (Production)                │
+│       SQLite (Local Development)             │
 └──────────────────────────────────────────────┘
+
 🛠️ Technology Stack
+
 Frontend
+
 React
+
 Vite
+
 Tailwind CSS
+
 React Router
+
 Axios
+
 Recharts
+
 Backend
+
 Python
+
 FastAPI
+
 SQLAlchemy
+
 JWT Authentication
+
 REST APIs
+
 Database
+
 PostgreSQL — production
+
 SQLite — local development/testing
+
 Matching
+
 Python-based weighted matching engine
+
 Item/name similarity
+
 Category matching
+
 Location matching
+
 Description similarity
+
 Date proximity
+
 Hard validation rules
-Development & Deployment
-Git
-GitHub
-Vercel — frontend deployment
-Render — backend deployment
+
+Deployment
+
+Git / GitHub
+
+Vercel — frontend
+
+Render — backend
+
+PostgreSQL — production database
+
 📁 Project Structure
+
 lost-and-found/
 │
 ├── campusfind/
-│   │
 │   ├── backend/
 │   │   ├── app/
 │   │   │   ├── matching/
@@ -293,7 +359,6 @@ lost-and-found/
 │   │   │   ├── schemas/
 │   │   │   ├── services/
 │   │   │   └── main.py
-│   │   │
 │   │   ├── tests/
 │   │   ├── requirements.txt
 │   │   └── ...
@@ -309,63 +374,53 @@ lost-and-found/
 │
 └── data/
     └── hypothetical_lost_and_found_dataset.csv
+
 🚀 Local Setup
+
 Prerequisites
 
-Make sure the following are installed:
-
 Python 3.x
+
 Node.js
+
 npm
+
 Git
-1. Clone the Repository
+
+1. Clone the repository
+
 git clone https://github.com/bhargavik277/lost-and-found.git
 cd lost-and-found
-2. Backend Setup
+
+2. Backend
+
 cd campusfind/backend
-
-Create and activate the virtual environment:
-
-Windows
-..\venv\Scripts\Activate.ps1
-
-Install dependencies:
-
 pip install -r requirements.txt
-
-Run the backend:
-
 uvicorn app.main:app --reload
 
-The backend will normally be available at:
+Backend:
 
 http://127.0.0.1:8000
-3. Frontend Setup
+
+3. Frontend
 
 Open another terminal:
 
 cd campusfind/frontend
-
-Install dependencies:
-
 npm install
-
-Run the development server:
-
 npm run dev
 
-The frontend will normally be available at:
+Frontend:
 
 http://localhost:5173
+
 ⚙️ Environment Variables
 
-The frontend uses:
+Frontend:
 
 VITE_API_URL=http://127.0.0.1:8000
 
-For production, set the API URL to the deployed backend.
-
-The backend uses environment variables for configuration such as:
+Backend configuration includes:
 
 DATABASE_URL=
 JWT_SECRET=
@@ -379,115 +434,116 @@ Do not commit .env files or secrets to GitHub.
 
 👤 Demo Accounts
 
-For demonstration/testing, the project includes demo roles.
-
 Student
+
 Email: stu001@campus.edu
 Password: STU001
 Role: STUDENT
+
 Admin
+
 Email: admin@campusfind.edu
 Password: admin123
 Role: ADMIN
+
 Security Desk
+
 Email: security@campusfind.edu
 Password: security123
 Role: SECURITY
 
-Demo credentials should be changed or disabled before using the system in a real deployment.
+Demo credentials are for project demonstration/testing and should be changed before real-world use.
 
-🌐 Deployment
-Frontend
-
-The React frontend can be deployed using Vercel.
-
-Backend
-
-The FastAPI backend can be deployed using Render with a PostgreSQL database.
-
-Production architecture:
-
-User Browser
-     │
-     ▼
-Vercel
-React Frontend
-     │
-     │ HTTPS REST API
-     ▼
-Render
-FastAPI Backend
-     │
-     ▼
-PostgreSQL
 🧪 Testing
 
-The backend includes automated tests for important system workflows.
-
-Run:
+Run backend tests:
 
 cd campusfind/backend
 pytest
 
-The test suite covers areas such as:
+The test suite covers important workflows including:
 
 Matching validation
+
 Impossible chronology
+
 Incompatible item types
+
 Claim workflow
+
 Admin approval
+
 Admin-only deletion
+
 Timeline behavior
+
 Item return status
+
 Collection workflow
 
 Build the frontend:
 
 cd campusfind/frontend
 npm run build
+
 📊 Dataset
 
-The project includes a hypothetical lost-and-found dataset used for testing and demonstrating analytics and system behavior.
+The project includes a hypothetical lost-and-found dataset for testing, demonstration, and analytics.
 
-The dataset contains fields such as:
+Fields include:
 
 Student ID
+
 Item Name
+
 Category
+
 Location
+
 Date Reported
+
 Time Reported
+
 Report Type
+
 Recovered
+
 Search Method
+
 Difficulty
+
 System Usefulness
+
 Preferred Feature
+
 Days to Recovery
+
 Status
 
-The dataset is intended for project demonstration/testing and does not represent real student records.
+The dataset is hypothetical and does not represent real student records.
 
 📈 Analytics
 
 The admin dashboard provides system-level information such as:
 
 Total reported items
-Returned/recovered items
-Pending claims
-User information
-Claim activity
-Other system statistics supported by the dashboard
 
-This helps administrators understand how effectively the lost-and-found system is being used.
+Returned/recovered items
+
+Pending claims
+
+User information
+
+Claim activity
+
+Other supported system statistics
 
 🔔 Notification System
 
-Notifications are generated for important events.
+Important events generate notifications.
 
-Examples include:
+Student example
 
-Student
 CLAIM APPROVED
 
 Your claim for 'keys' has been approved!
@@ -495,7 +551,9 @@ Your claim for 'keys' has been approved!
 Collection OTP: 220506
 
 Please visit the Main Security Desk to collect your item.
-Security Desk
+
+Security Desk example
+
 NEW COLLECTION REQUEST
 
 A collection request for 'keys' has been approved.
@@ -505,13 +563,11 @@ Student ID: STU001
 
 Verify the student's Collection OTP at the Main Security Desk.
 
-The Security Desk notification does not need to expose the student's OTP.
+The Security Desk notification should not expose the student's OTP.
 
 🕒 Timeline
 
-Important actions are recorded through the system timeline.
-
-Examples:
+Important actions are recorded through the item/claim timeline:
 
 Item Reported
       ↓
@@ -531,59 +587,73 @@ This provides traceability for the item lifecycle.
 
 🔒 Security Considerations
 
-CampusFind includes several security-oriented controls:
+CampusFind includes:
 
 JWT-based authentication
+
 Role-based access control
+
 Admin-only sensitive operations
-Protected security endpoints
+
+Protected Security Desk endpoints
+
 Backend OTP verification
+
 OTP expiration
+
 Prevention of OTP reuse
+
 Ownership evidence review
+
 No automatic claim approval based only on match score
-Validation of impossible dates
-Validation of incompatible item types
+
+Impossible-date validation
+
+Incompatible-item validation
+
 Environment-based secrets
-Production database support
+
 🌱 Future Scope
 
-Possible future improvements include:
-
 Mobile application
+
 Email/SMS notifications
+
 QR-based item collection
+
 College ID integration
-More advanced semantic matching
+
+Advanced semantic matching
+
 Image-based item similarity
-Computer vision for found-item images
+
+Computer vision for item images
+
 Multi-campus support
-Real-time notification delivery
+
+Real-time notifications
+
 Security Desk QR/OTP scanning
-Improved analytics and reporting
-Audit logs and advanced administrative controls
+
+Advanced analytics and reporting
+
+Detailed audit logs
+
 🎯 Project Impact
 
-CampusFind aims to make college lost-and-found management:
+Faster: Centralized reporting and matching reduce the effort needed to search for lost items.
 
-Faster
-Students can search and report items through one platform.
+More Organized: Lost and found records are maintained in one platform.
 
-More Organized
-Lost and found records are centralized.
+More Reliable: Smart matching and validation reduce irrelevant matches.
 
-More Reliable
-Smart matching and validation reduce irrelevant matches.
+More Secure: Claims are reviewed before collection and OTP verification protects the handover.
 
-More Secure
-Claims are reviewed before collection and OTP verification protects the handover process.
-
-More Transparent
-Notifications and timelines provide visibility into the status of each report.
+More Transparent: Notifications and timelines make the status of each report visible.
 
 📸 Screenshots
 
-Add project screenshots here:
+Recommended screenshot folder:
 
 docs/
 ├── student-dashboard.png
@@ -595,10 +665,11 @@ docs/
 ├── security-dashboard.png
 └── otp-verification.png
 
-Example:
+Add screenshots using:
 
 ![Student Dashboard](docs/student-dashboard.png)
-👩‍💻 Contributors
+
+👩‍💻 Contributor
 
 Bhargavi Keche
 
@@ -608,15 +679,6 @@ CampusFind — Smart College Lost & Found Management System
 
 This project was developed as a college academic/project implementation.
 
-If you plan to publish or reuse the project outside the academic context, add an appropriate open-source license such as MIT after confirming the intended usage and ownership.
+⭐ CampusFind
 
-⭐ Project Tagline
-
-CampusFind — Lost. Found. Reconnected.
-"""
-
-path = Path("/mnt/data/README.md")
-path.write_text(readme, encoding="utf-8")
-print(f"Created {path} ({len(readme.splitlines())} lines)")
-
-Analyzed
+Lost. Found. Reconnected.
