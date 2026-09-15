@@ -55,6 +55,19 @@ class ReporterInfo(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ItemTimelineOut(BaseModel):
+    id: UUID
+    item_id: UUID
+    status: str
+    actor_id: Optional[UUID] = None
+    actor_role: Optional[str] = None
+    actor_name: Optional[str] = None
+    note: Optional[str] = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class ItemOut(BaseModel):
     id: UUID
     reported_by: UUID
@@ -72,8 +85,10 @@ class ItemOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     reporter: Optional[ReporterInfo] = None
+    timeline_events: Optional[list[ItemTimelineOut]] = None
 
     model_config = {"from_attributes": True}
+
 
 
 class ItemSearchParams(BaseModel):

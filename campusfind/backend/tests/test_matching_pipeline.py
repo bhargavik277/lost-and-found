@@ -1,5 +1,9 @@
+import sys
+from pathlib import Path
 from datetime import date
 import pytest
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from app.matching.similarity import (
     validate_chronology,
     check_item_type_compatibility,
@@ -11,6 +15,7 @@ from app.matching.similarity import (
 )
 from app.matching.scorer import calculate_score
 from app.models.item import Item, ReportType, ItemStatus
+
 
 
 def create_dummy_item(name, category, location, description, report_date, report_type=ReportType.LOST):
@@ -95,3 +100,14 @@ def test_valid_semantic_synonyms_storage():
     assert score.total_score >= 80.0
     assert score.match_label == "Strong Match"
     assert score.claim_allowed
+
+
+if __name__ == "__main__":
+    test_chronology_rejection_when_found_before_lost()
+    test_incompatible_types_hard_rejection()
+    test_incompatible_earphone_and_usb_drive()
+    test_valid_semantic_synonyms_boat_earphones()
+    test_valid_semantic_synonyms_phone()
+    test_valid_semantic_synonyms_storage()
+    print("[SUCCESS] All Matching Pipeline tests passed successfully!")
+

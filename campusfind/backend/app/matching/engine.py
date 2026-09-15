@@ -82,9 +82,28 @@ def run_matching(new_item: Item, db: Session) -> List[Match]:
         if found_item.status == ItemStatus.ACTIVE:
             found_item.status = ItemStatus.MATCHED
 
+        from app.services.timeline_service import record_timeline_event
+        record_timeline_event(
+            db,
+            item_id=lost_item.id,
+            status="MATCHED",
+            actor_role="SYSTEM",
+            actor_name="CampusFind Smart Matching Engine",
+            note=f"Matched with found item '{found_item.item_name}' ({breakdown.total_score:.0f}% confidence)",
+        )
+        record_timeline_event(
+            db,
+            item_id=found_item.id,
+            status="MATCHED",
+            actor_role="SYSTEM",
+            actor_name="CampusFind Smart Matching Engine",
+            note=f"Matched with lost report '{lost_item.item_name}' ({breakdown.total_score:.0f}% confidence)",
+        )
+
         db.commit()
         db.refresh(match_record)
         created_matches.append(match_record)
+
 
         # Send notification to the lost-item reporter
         _notify_match(db, lost_item, found_item, match_record, breakdown.total_score)

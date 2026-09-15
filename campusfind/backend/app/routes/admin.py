@@ -11,13 +11,14 @@ from app.models.match import Match, MatchStatus
 from app.models.claim import Claim, ClaimStatus
 from app.models.survey import SurveyResponse
 from app.schemas.item import ItemOut, ItemUpdate
-from app.schemas.claim import ClaimOutAdmin, ClaimReview
+from app.schemas.claim import ClaimOutAdmin, ClaimReview, ClaimVerifyOTP
 from app.schemas.user import UserOut
 from app.services.auth_service import get_current_user, require_admin
-from app.services.item_service import get_item, update_item
-from app.services.claim_service import get_claim, get_all_claims, review_claim
+from app.services.item_service import get_item, update_item, delete_item, archive_item
+from app.services.claim_service import get_claim, get_all_claims, review_claim, verify_claim_otp
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
+
 
 
 # ── Items Management ──────────────────────────────────────────────────────────
@@ -50,6 +51,33 @@ def admin_update_item(
     if not item:
         raise HTTPException(status_code=404, detail="Item not found.")
     return update_item(db, item, data)
+
+
+@router.post("/items/{item_id}/archive", response_model=ItemOut)
+def admin_archive_item(
+    item_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    """Safely archives and closes a completed/resolved item report (Admin only)."""
+    item = get_item(db, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found.")
+    return archive_item(db, item, current_user)
+
+
+@router.delete("/items/{item_id}")
+def admin_delete_item(
+    item_id: UUID,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """Permanently delete an item report and clean up related records (Admin only)."""
+    item = get_item(db, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found.")
+    return delete_item(db, item)
+
 
 
 # ── Claims Management ─────────────────────────────────────────────────────────
@@ -86,6 +114,21 @@ def admin_review_claim(
     if not claim:
         raise HTTPException(status_code=404, detail="Claim not found.")
     return review_claim(db, claim, data, current_user.id)
+
+
+@router.post("/claims/{claim_id}/verify-otp", response_model=ClaimOutAdmin)
+def admin_verify_claim_otp(
+    claim_id: UUID,
+    data: ClaimVerifyOTP,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    """Admin verifies the 6-digit collection OTP presented by claimant to complete handover."""
+    try:
+        return verify_claim_otp(db, claim_id, data.otp, current_user)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 
 # ── Users Management ──────────────────────────────────────────────────────────

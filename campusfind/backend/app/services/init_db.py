@@ -30,17 +30,38 @@ def init_database():
     logger.info("[*] Initializing database schema...")
     Base.metadata.create_all(bind=engine)
 
-    # Ensure name_score exists in matches table
+    # Ensure schema migrations for matches and claims
     try:
         inspector = inspect(engine)
-        if "matches" in inspector.get_table_names():
+        tables = inspector.get_table_names()
+        if "matches" in tables:
             columns = [c["name"] for c in inspector.get_columns("matches")]
             if "name_score" not in columns:
                 with engine.begin() as conn:
                     conn.execute(text("ALTER TABLE matches ADD COLUMN name_score FLOAT DEFAULT 0.0"))
                 logger.info("[+] Added name_score column to matches table")
+
+        if "claims" in tables:
+            claim_cols = [c["name"] for c in inspector.get_columns("claims")]
+            with engine.begin() as conn:
+                if "proof_image_url" not in claim_cols:
+                    conn.execute(text("ALTER TABLE claims ADD COLUMN proof_image_url VARCHAR(500)"))
+                    logger.info("[+] Added proof_image_url column to claims table")
+                if "otp_hash" not in claim_cols:
+                    conn.execute(text("ALTER TABLE claims ADD COLUMN otp_hash VARCHAR(255)"))
+                    logger.info("[+] Added otp_hash column to claims table")
+                if "otp_plain" not in claim_cols:
+                    conn.execute(text("ALTER TABLE claims ADD COLUMN otp_plain VARCHAR(10)"))
+                    logger.info("[+] Added otp_plain column to claims table")
+                if "otp_expires_at" not in claim_cols:
+                    conn.execute(text("ALTER TABLE claims ADD COLUMN otp_expires_at DATETIME"))
+                    logger.info("[+] Added otp_expires_at column to claims table")
+                if "is_otp_used" not in claim_cols:
+                    conn.execute(text("ALTER TABLE claims ADD COLUMN is_otp_used BOOLEAN DEFAULT 0"))
+                    logger.info("[+] Added is_otp_used column to claims table")
     except Exception as e:
         logger.info(f"[i] Schema check: {e}")
+
 
     db: Session = SessionLocal()
     try:
@@ -90,13 +111,15 @@ def init_database():
 
         db.commit()
 
-        # 3. Safely run dataset seeding if seed script exists
+        # 3. Safely run dataset seeding if seed script exists and items table is empty
         try:
-            try:
-                from seed import seed as run_csv_seed
-            except ImportError:
-                from campusfind.backend.seed import seed as run_csv_seed
-            run_csv_seed()
+            from app.models.item import Item
+            if db.query(Item).count() == 0:
+                try:
+                    from seed import seed as run_csv_seed
+                except ImportError:
+                    from campusfind.backend.seed import seed as run_csv_seed
+                run_csv_seed()
         except Exception as seed_err:
             logger.info(f"[i] CSV seeding step: {seed_err}")
 

@@ -4,6 +4,7 @@ from app.models.match import Match, MatchStatus
 from app.models.claim import Claim, ClaimStatus
 from app.models.notification import Notification, NotificationType
 from app.models.survey import SurveyResponse
+from app.models.timeline import ItemTimeline
 
 __all__ = [
     "User", "UserRole",
@@ -12,4 +13,6 @@ __all__ = [
     "Claim", "ClaimStatus",
     "Notification", "NotificationType",
     "SurveyResponse",
+    "ItemTimeline",
 ]
+

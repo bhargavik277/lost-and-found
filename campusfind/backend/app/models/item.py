@@ -51,7 +51,9 @@ class Item(Base):
 
     # Relationships
     reporter = relationship("User", back_populates="items", foreign_keys=[reported_by])
-    lost_matches = relationship("Match", back_populates="lost_item", foreign_keys="Match.lost_item_id")
-    found_matches = relationship("Match", back_populates="found_item", foreign_keys="Match.found_item_id")
-    claims = relationship("Claim", back_populates="item")
-    survey_response = relationship("SurveyResponse", back_populates="item", uselist=False)
+    lost_matches = relationship("Match", back_populates="lost_item", foreign_keys="Match.lost_item_id", cascade="all, delete-orphan")
+    found_matches = relationship("Match", back_populates="found_item", foreign_keys="Match.found_item_id", cascade="all, delete-orphan")
+    claims = relationship("Claim", back_populates="item", cascade="all, delete-orphan")
+    survey_response = relationship("SurveyResponse", back_populates="item", uselist=False, cascade="all, delete-orphan")
+    timeline_events = relationship("ItemTimeline", back_populates="item", cascade="all, delete-orphan", order_by="ItemTimeline.created_at.asc()")
+

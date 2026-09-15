@@ -1,4 +1,5 @@
 import sys
+import uuid
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -7,12 +8,13 @@ from app.main import app
 
 def test_full_lifecycle():
     client = TestClient(app)
+    uid = uuid.uuid4().hex[:6]
 
     # 1. Register student
     reg = client.post('/auth/register', json={
-        'name': 'Alice Smith',
-        'student_id': 'STU999',
-        'email': 'alice@campus.edu',
+        'name': f'Alice Smith {uid}',
+        'student_id': f'STU_{uid}',
+        'email': f'alice_{uid}@campus.edu',
         'password': 'password123'
     })
     assert reg.status_code == 201, f"Register failed: {reg.text}"
@@ -34,9 +36,9 @@ def test_full_lifecycle():
 
     # 3. Report Found Item from Bob
     reg2 = client.post('/auth/register', json={
-        'name': 'Bob Jones',
-        'student_id': 'STU998',
-        'email': 'bob@campus.edu',
+        'name': f'Bob Jones {uid}',
+        'student_id': f'STUB_{uid}',
+        'email': f'bob_{uid}@campus.edu',
         'password': 'password123'
     })
     assert reg2.status_code == 201

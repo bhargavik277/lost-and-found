@@ -1,13 +1,211 @@
-from typing import Optional, List
+import re
+import secrets
+import hashlib
+from typing import Optional, List, Dict, Any, Set
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session, joinedload
 from app.models.claim import Claim, ClaimStatus
-from app.models.item import Item, ItemStatus
+from app.models.item import Item, ItemStatus, ReportType
+from app.models.match import Match
 from app.models.user import User
-from app.schemas.claim import ClaimCreate, ClaimReview
+from app.models.timeline import ItemTimeline
+from app.schemas.claim import ClaimCreate, ClaimReview, EvidenceStrengthInfo
 from app.services.notification_service import create_notification
+from app.services.timeline_service import record_timeline_event
 from app.models.notification import NotificationType
+
+STOPWORDS: Set[str] = {
+    "a", "an", "the", "and", "or", "in", "on", "at", "to", "for", "with", "by", "from",
+    "is", "was", "are", "were", "it", "its", "my", "of", "about", "after", "near", "this",
+    "that", "has", "have", "had", "can", "could", "would", "please", "very", "some"
+}
+
+
+def _tokenize(text: Optional[str]) -> Set[str]:
+    """Tokenize and remove common stopwords from text."""
+    if not text:
+        return set()
+    words = re.findall(r"\b[a-zA-Z0-9]{3,}\b", text.lower())
+    return {w for w in words if w not in STOPWORDS}
+
+
+def calculate_evidence_strength(
+    found_item: Optional[Item],
+    claim: Claim,
+    lost_item: Optional[Item] = None,
+) -> EvidenceStrengthInfo:
+    """
+    Computes a transparent, assist-only Evidence Strength indicator.
+    Evaluates:
+      1. Proof description detail (>30 chars = +25, 10-30 chars = +15)
+      2. Distinctive identifiers provided = +20
+      3. Approximate time misplaced = +15
+      4. Proof image or additional notes = +10
+      5. Keyword/feature overlap with found item description/location = up to +25 (5 pts per matched token)
+    Total is capped at 95% (never 100% since evidence assists and cannot mathematically prove ownership).
+    """
+    score = 0
+    breakdown = {}
+
+    # 1. Proof description completeness
+    desc = (claim.proof_description or "").strip()
+    if len(desc) >= 30:
+        desc_pts = 25
+        desc_note = "Detailed ownership description provided (>30 chars)"
+    elif len(desc) >= 10:
+        desc_pts = 15
+        desc_note = "Basic ownership description provided"
+    else:
+        desc_pts = 5
+        desc_note = "Minimal description"
+    score += desc_pts
+    breakdown["proof_description"] = {"points": desc_pts, "max": 25, "note": desc_note}
+
+    # 2. Distinctive identifiers
+    ident = (claim.distinctive_features or "").strip()
+    if ident:
+        ident_pts = 20
+        ident_note = f"Distinctive identifier/marker provided ({ident[:30]}...)"
+    else:
+        ident_pts = 0
+        ident_note = "No serial number, stickers, or distinctive marks specified"
+    score += ident_pts
+    breakdown["distinctive_identifiers"] = {"points": ident_pts, "max": 20, "note": ident_note}
+
+    # 3. Approximate time
+    time_val = (claim.approximate_time or "").strip()
+    if time_val:
+        time_pts = 15
+        time_note = f"Specific timeframe specified ({time_val[:30]})"
+    else:
+        time_pts = 0
+        time_note = "No specific loss timeframe specified"
+    score += time_pts
+    breakdown["approximate_time"] = {"points": time_pts, "max": 15, "note": time_note}
+
+    # 4. Proof image or additional notes
+    notes = (claim.additional_info or "").strip()
+    img = (claim.proof_image_url or "").strip()
+    bonus_pts = 0
+    bonus_notes = []
+    if img:
+        bonus_pts += 5
+        bonus_notes.append("Claimant proof photo/receipt attached")
+    if notes:
+        bonus_pts += 5
+        bonus_notes.append("Additional verification notes provided")
+    score += bonus_pts
+    breakdown["additional_evidence"] = {
+        "points": bonus_pts,
+        "max": 10,
+        "note": " & ".join(bonus_notes) if bonus_notes else "No additional notes or images"
+    }
+
+    # 5. Semantic keyword overlap between Claim Evidence (+ Lost report) and Found Report
+    matched_keywords = []
+    if found_item:
+        found_tokens = _tokenize(f"{found_item.item_name} {found_item.category} {found_item.location} {found_item.description}")
+        claim_tokens = _tokenize(f"{claim.proof_description} {claim.distinctive_features} {claim.additional_info}")
+        if lost_item:
+            claim_tokens |= _tokenize(f"{lost_item.item_name} {lost_item.description} {lost_item.location}")
+
+        overlap = found_tokens.intersection(claim_tokens)
+        matched_keywords = sorted(list(overlap))
+        overlap_pts = min(25, len(matched_keywords) * 5)
+        score += overlap_pts
+        breakdown["keyword_correlation"] = {
+            "points": overlap_pts,
+            "max": 25,
+            "note": f"{len(matched_keywords)} matching keyword(s) with found item report: {', '.join(matched_keywords[:6])}"
+        }
+    else:
+        breakdown["keyword_correlation"] = {"points": 0, "max": 25, "note": "No found item details to correlate"}
+
+    # Cap at 95%
+    final_score = min(95, max(10, score))
+    level = "High" if final_score >= 75 else ("Moderate" if final_score >= 45 else "Low")
+
+    return EvidenceStrengthInfo(
+        score=final_score,
+        level=level,
+        matched_keywords=matched_keywords,
+        breakdown=breakdown,
+        disclaimer="Evidence strength is an assistance indicator and does not prove ownership.",
+    )
+
+
+def _enrich_claim_admin(db: Session, claim: Claim) -> Claim:
+    """Helper to attach AI Match, Lost Report, Evidence Strength, and Timeline to a Claim."""
+    if not claim:
+        return claim
+
+    # 1. Look for a Match between this found item and any lost item reported by the claimant
+    match = (
+        db.query(Match)
+        .options(joinedload(Match.lost_item), joinedload(Match.found_item))
+        .join(Item, Match.lost_item_id == Item.id)
+        .filter(
+            Match.found_item_id == claim.item_id,
+            Item.reported_by == claim.user_id,
+            Item.report_type == ReportType.LOST,
+        )
+        .order_by(Match.match_score.desc())
+        .first()
+    )
+
+    lost_item = None
+    if match and match.lost_item:
+        lost_item = match.lost_item
+    else:
+        # Check if claimant has reported a lost item matching category or most recent lost report
+        if claim.item:
+            lost_item = (
+                db.query(Item)
+                .filter(
+                    Item.reported_by == claim.user_id,
+                    Item.report_type == ReportType.LOST,
+                    Item.category == claim.item.category,
+                )
+                .order_by(Item.date_reported.desc())
+                .first()
+            )
+        if not lost_item:
+            lost_item = (
+                db.query(Item)
+                .filter(
+                    Item.reported_by == claim.user_id,
+                    Item.report_type == ReportType.LOST,
+                )
+                .order_by(Item.date_reported.desc())
+                .first()
+            )
+        if not match:
+            match = (
+                db.query(Match)
+                .options(joinedload(Match.lost_item), joinedload(Match.found_item))
+                .filter(Match.found_item_id == claim.item_id)
+                .order_by(Match.match_score.desc())
+                .first()
+            )
+
+    setattr(claim, "match", match)
+    setattr(claim, "lost_item", lost_item)
+
+    # 2. Evidence Strength
+    evidence_strength = calculate_evidence_strength(claim.item, claim, lost_item)
+    setattr(claim, "evidence_strength", evidence_strength)
+
+    # 3. Item Timeline events
+    timeline = (
+        db.query(ItemTimeline)
+        .filter(ItemTimeline.item_id == claim.item_id)
+        .order_by(ItemTimeline.created_at.asc())
+        .all()
+    )
+    setattr(claim, "timeline", timeline)
+
+    return claim
 
 
 def create_claim(db: Session, data: ClaimCreate, user_id: UUID) -> Claim:
@@ -15,10 +213,10 @@ def create_claim(db: Session, data: ClaimCreate, user_id: UUID) -> Claim:
     existing = db.query(Claim).filter(
         Claim.item_id == data.item_id,
         Claim.user_id == user_id,
-        Claim.status == ClaimStatus.PENDING,
+        Claim.status.in_([ClaimStatus.PENDING, ClaimStatus.APPROVED]),
     ).first()
     if existing:
-        raise ValueError("You already have a pending claim for this item.")
+        raise ValueError("You already have an active or pending claim for this item.")
 
     claim = Claim(
         item_id=data.item_id,
@@ -27,6 +225,7 @@ def create_claim(db: Session, data: ClaimCreate, user_id: UUID) -> Claim:
         distinctive_features=data.distinctive_features,
         approximate_time=data.approximate_time,
         additional_info=data.additional_info,
+        proof_image_url=data.proof_image_url,
     )
     db.add(claim)
 
@@ -34,7 +233,19 @@ def create_claim(db: Session, data: ClaimCreate, user_id: UUID) -> Claim:
     item = db.query(Item).filter(Item.id == data.item_id).first()
     if item:
         item.status = ItemStatus.CLAIMED
-        # Notify admin (handled at route level)
+        # Get claimant name
+        claimant = db.query(User).filter(User.id == user_id).first()
+        claimant_name = claimant.name if claimant else "Student"
+        # Record timeline event
+        record_timeline_event(
+            db,
+            item_id=item.id,
+            status="CLAIM_SUBMITTED",
+            actor_id=user_id,
+            actor_role="STUDENT",
+            actor_name=claimant_name,
+            note=f"Ownership claim submitted by {claimant_name}",
+        )
 
     db.commit()
     db.refresh(claim)
@@ -42,12 +253,18 @@ def create_claim(db: Session, data: ClaimCreate, user_id: UUID) -> Claim:
 
 
 def get_claim(db: Session, claim_id: UUID) -> Optional[Claim]:
-    return (
+    claim = (
         db.query(Claim)
-        .options(joinedload(Claim.claimant), joinedload(Claim.item))
+        .options(
+            joinedload(Claim.claimant),
+            joinedload(Claim.item).joinedload(Item.reporter),
+        )
         .filter(Claim.id == claim_id)
         .first()
     )
+    if claim:
+        _enrich_claim_admin(db, claim)
+    return claim
 
 
 def get_user_claims(db: Session, user_id: UUID) -> List[Claim]:
@@ -63,11 +280,14 @@ def get_user_claims(db: Session, user_id: UUID) -> List[Claim]:
 def get_all_claims(db: Session, status: Optional[ClaimStatus] = None) -> List[Claim]:
     q = db.query(Claim).options(
         joinedload(Claim.claimant),
-        joinedload(Claim.item),
+        joinedload(Claim.item).joinedload(Item.reporter),
     )
     if status:
         q = q.filter(Claim.status == status)
-    return q.order_by(Claim.created_at.desc()).all()
+    claims = q.order_by(Claim.created_at.desc()).all()
+    for c in claims:
+        _enrich_claim_admin(db, c)
+    return claims
 
 
 def review_claim(
@@ -82,30 +302,164 @@ def review_claim(
     claim.reviewed_at = datetime.utcnow()
 
     item = db.query(Item).filter(Item.id == claim.item_id).first()
+    admin = db.query(User).filter(User.id == admin_id).first()
+    admin_name = admin.name if admin else "Campus Admin"
 
     if review_data.status == ClaimStatus.APPROVED:
+        # Generate secure 6-digit collection OTP
+        raw_otp = f"{secrets.randbelow(1000000):06d}"
+        claim.otp_plain = raw_otp
+        claim.otp_hash = hashlib.sha256(raw_otp.encode()).hexdigest()
+        claim.otp_expires_at = datetime.utcnow() + timedelta(hours=72)
+        claim.is_otp_used = False
+
         if item:
             item.status = ItemStatus.RETURNED
             item.recovered = True
-        # Notify claimant
+
+        # Record timeline events
+        record_timeline_event(
+            db,
+            item_id=claim.item_id,
+            status="APPROVED",
+            actor_id=admin_id,
+            actor_role="ADMIN",
+            actor_name=admin_name,
+            note=f"Claim approved by {admin_name}. Collection OTP generated.",
+        )
+        record_timeline_event(
+            db,
+            item_id=claim.item_id,
+            status="READY_FOR_COLLECTION",
+            actor_id=admin_id,
+            actor_role="ADMIN",
+            actor_name=admin_name,
+            note="Item is staged at Main Campus Security Desk for handover.",
+        )
+
+        # Notify claimant with OTP and instructions
         create_notification(
             db,
             user_id=claim.user_id,
-            message=f"Your claim for '{item.item_name if item else 'item'}' has been approved! Please collect it.",
+            message=(
+                f"Your claim for '{item.item_name if item else 'item'}' has been approved! "
+                f"Your Collection OTP is {raw_otp}. Please visit the Main Security Desk to collect your item."
+            ),
             notif_type=NotificationType.CLAIM_APPROVED,
             related_item_id=claim.item_id,
         )
+
     elif review_data.status == ClaimStatus.REJECTED:
         if item:
-            item.status = ItemStatus.ACTIVE  # revert back to active
+            # Check if there are other pending/approved claims
+            other_active = db.query(Claim).filter(
+                Claim.item_id == item.id,
+                Claim.id != claim.id,
+                Claim.status.in_([ClaimStatus.PENDING, ClaimStatus.APPROVED]),
+            ).first()
+            if not other_active:
+                item.status = ItemStatus.ACTIVE
+
+        # Record timeline event
+        record_timeline_event(
+            db,
+            item_id=claim.item_id,
+            status="UNDER_REVIEW",
+            actor_id=admin_id,
+            actor_role="ADMIN",
+            actor_name=admin_name,
+            note=f"Claim rejected by {admin_name}. {review_data.admin_note or ''}",
+        )
+
         create_notification(
             db,
             user_id=claim.user_id,
-            message=f"Your claim for '{item.item_name if item else 'item'}' was not approved. Please contact the admin for more information.",
+            message=f"Your claim for '{item.item_name if item else 'item'}' was not approved. {review_data.admin_note or 'Please contact admin.'}",
             notif_type=NotificationType.CLAIM_REJECTED,
             related_item_id=claim.item_id,
         )
 
     db.commit()
     db.refresh(claim)
+    _enrich_claim_admin(db, claim)
+    return claim
+
+
+def verify_claim_otp(
+    db: Session,
+    claim_id: UUID,
+    otp_input: str,
+    admin_user: User,
+) -> Claim:
+    """
+    Verifies the collection OTP presented by the claimant at the handover desk.
+    Transitions the item status to RETURNED upon successful verification.
+    """
+    claim = db.query(Claim).filter(Claim.id == claim_id).first()
+    if not claim:
+        raise ValueError("Claim not found.")
+
+    if claim.status != ClaimStatus.APPROVED:
+        raise ValueError("This claim is not approved for collection.")
+
+    if claim.is_otp_used:
+        raise ValueError("This collection OTP has already been verified and used.")
+
+    if claim.otp_expires_at and datetime.utcnow() > claim.otp_expires_at:
+        raise ValueError("This collection OTP has expired. Please contact administration.")
+
+    input_clean = otp_input.strip()
+    input_hash = hashlib.sha256(input_clean.encode()).hexdigest()
+
+    if input_hash != claim.otp_hash and input_clean != claim.otp_plain:
+        raise ValueError("Invalid collection OTP. Please double-check the 6-digit code shown on the claimant's screen.")
+
+    # Mark OTP as used
+    claim.is_otp_used = True
+
+    # Mark item as RETURNED and recovered
+    item = db.query(Item).filter(Item.id == claim.item_id).first()
+    if item:
+        item.status = ItemStatus.RETURNED
+        item.recovered = True
+        item.updated_at = datetime.utcnow()
+
+        # Calculate days to recovery if dates exist
+        if item.date_reported:
+            days = (datetime.utcnow().date() - item.date_reported).days
+            item.days_to_recovery = max(0, days)
+
+    # Record timeline transitions
+    admin_name = admin_user.name if admin_user else "Campus Admin"
+    record_timeline_event(
+        db,
+        item_id=claim.item_id,
+        status="COLLECTED",
+        actor_id=admin_user.id if admin_user else None,
+        actor_role="ADMIN",
+        actor_name=admin_name,
+        note=f"Collection OTP verified by {admin_name}. Item handed over to claimant.",
+    )
+    record_timeline_event(
+        db,
+        item_id=claim.item_id,
+        status="RETURNED",
+        actor_id=admin_user.id if admin_user else None,
+        actor_role="ADMIN",
+        actor_name=admin_name,
+        note="Item recovery lifecycle completed. Status updated to RETURNED.",
+    )
+
+    # Notify claimant
+    create_notification(
+        db,
+        user_id=claim.user_id,
+        message=f"Item '{item.item_name if item else 'item'}' has been successfully handed over! Recovery completed.",
+        notif_type=NotificationType.ITEM_RETURNED,
+        related_item_id=claim.item_id,
+    )
+
+    db.commit()
+    db.refresh(claim)
+    _enrich_claim_admin(db, claim)
     return claim

@@ -77,10 +77,12 @@ export const adminAPI = {
   analytics: () => api.get('/admin/analytics'),
   items: (params) => api.get('/admin/items', { params }),
   updateItem: (id, data) => api.patch(`/admin/items/${id}`, data),
+  deleteItem: (id) => api.delete(`/admin/items/${id}`),
   claims: (params) => api.get('/admin/claims', { params }),
   getClaim: (id) => api.get(`/admin/claims/${id}`),
   reviewClaim: (id, data) => api.patch(`/admin/claims/${id}/review`, data),
   users: () => api.get('/admin/users'),
 }
+
 
 export default api
