@@ -114,24 +114,55 @@ def init_database():
                 logger.info("[+] Added name_score column to matches table")
 
         # -- claims: add OTP and proof_image columns if missing
+        # Each column is migrated in its own transaction so a single failure
+        # does not roll back the other columns.
         if "claims" in tables:
             claim_cols = [c["name"] for c in inspector.get_columns("claims")]
-            with engine.begin() as conn:
-                if "proof_image_url" not in claim_cols:
-                    conn.execute(text("ALTER TABLE claims ADD COLUMN proof_image_url VARCHAR(500)"))
-                    logger.info("[+] Added proof_image_url column to claims table")
-                if "otp_hash" not in claim_cols:
-                    conn.execute(text("ALTER TABLE claims ADD COLUMN otp_hash VARCHAR(255)"))
-                    logger.info("[+] Added otp_hash column to claims table")
-                if "otp_plain" not in claim_cols:
-                    conn.execute(text("ALTER TABLE claims ADD COLUMN otp_plain VARCHAR(10)"))
-                    logger.info("[+] Added otp_plain column to claims table")
-                if "otp_expires_at" not in claim_cols:
-                    conn.execute(text("ALTER TABLE claims ADD COLUMN otp_expires_at DATETIME"))
-                    logger.info("[+] Added otp_expires_at column to claims table")
-                if "is_otp_used" not in claim_cols:
-                    conn.execute(text("ALTER TABLE claims ADD COLUMN is_otp_used BOOLEAN DEFAULT 0"))
-                    logger.info("[+] Added is_otp_used column to claims table")
+            logger.info(f"[i] claims columns found: {claim_cols}")
+
+            # Define each migration: (column_name, ADD COLUMN DDL for postgres, ADD COLUMN DDL for sqlite)
+            # PostgreSQL uses TIMESTAMP; SQLite uses DATETIME.
+            # is_otp_used is NOT NULL — supply DEFAULT so existing rows are safe.
+            ts_type = "TIMESTAMP" if _is_postgres() else "DATETIME"
+            claim_migrations = [
+                (
+                    "proof_image_url",
+                    "ALTER TABLE claims ADD COLUMN IF NOT EXISTS proof_image_url VARCHAR(500)",
+                    "ALTER TABLE claims ADD COLUMN proof_image_url VARCHAR(500)",
+                ),
+                (
+                    "otp_hash",
+                    "ALTER TABLE claims ADD COLUMN IF NOT EXISTS otp_hash VARCHAR(255)",
+                    "ALTER TABLE claims ADD COLUMN otp_hash VARCHAR(255)",
+                ),
+                (
+                    "otp_plain",
+                    "ALTER TABLE claims ADD COLUMN IF NOT EXISTS otp_plain VARCHAR(10)",
+                    "ALTER TABLE claims ADD COLUMN otp_plain VARCHAR(10)",
+                ),
+                (
+                    "otp_expires_at",
+                    f"ALTER TABLE claims ADD COLUMN IF NOT EXISTS otp_expires_at {ts_type}",
+                    f"ALTER TABLE claims ADD COLUMN otp_expires_at {ts_type}",
+                ),
+                (
+                    "is_otp_used",
+                    "ALTER TABLE claims ADD COLUMN IF NOT EXISTS is_otp_used BOOLEAN NOT NULL DEFAULT FALSE",
+                    "ALTER TABLE claims ADD COLUMN is_otp_used BOOLEAN NOT NULL DEFAULT 0",
+                ),
+            ]
+
+            for col_name, pg_sql, sqlite_sql in claim_migrations:
+                if col_name in claim_cols:
+                    logger.info(f"[i] claims.{col_name} — already exists, skipping")
+                    continue
+                ddl = pg_sql if _is_postgres() else sqlite_sql
+                try:
+                    with engine.begin() as conn:
+                        conn.execute(text(ddl))
+                    logger.info(f"[+] claims.{col_name} — added successfully")
+                except Exception as col_err:
+                    logger.error(f"[-] claims.{col_name} — migration failed: {col_err}")
     except Exception as e:
         logger.warning(f"[!] Schema migration step encountered an issue: {e}")
 
