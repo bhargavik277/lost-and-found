@@ -92,14 +92,68 @@ def _migrate_item_timelines(inspector):
         )
 
 
+def _migrate_user_roles(inspector):
+    """
+    Safely migrates users.role in PostgreSQL:
+    1. Expands column type to VARCHAR(50) if varchar to prevent length truncation.
+    2. Updates native PostgreSQL enum 'userrole' if present.
+    3. Drops old check constraints on users.role and adds updated constraint.
+    """
+    if not _is_postgres():
+        return
+
+    if "users" not in inspector.get_table_names():
+        return
+
+    try:
+        with engine.begin() as conn:
+            # 1. Expand column length if varchar
+            try:
+                conn.execute(text("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(50)"))
+                print("[CampusFind DB] users.role column expanded to VARCHAR(50)", flush=True)
+            except Exception as e:
+                logger.info(f"[i] users.role length alter notice: {e}")
+
+            # 2. Add 'SECURITY' to any native enum type if present
+            try:
+                conn.execute(text("ALTER TYPE userrole ADD VALUE IF NOT EXISTS 'SECURITY'"))
+                print("[CampusFind DB] PostgreSQL enum 'userrole' updated with 'SECURITY'", flush=True)
+            except Exception as e:
+                logger.info(f"[i] ALTER TYPE userrole notice: {e}")
+
+            # 3. Drop all old check constraints on users.role
+            try:
+                constraints_query = text("""
+                    SELECT c.conname 
+                    FROM pg_constraint c
+                    JOIN pg_class cl ON cl.oid = c.conrelid
+                    JOIN pg_attribute a ON a.attrelid = cl.oid AND a.attnum = ANY(c.conkey)
+                    WHERE cl.relname = 'users' AND a.attname = 'role' AND c.contype = 'c';
+                """)
+                result = conn.execute(constraints_query).fetchall()
+                for row in result:
+                    conname = row[0]
+                    conn.execute(text(f'ALTER TABLE users DROP CONSTRAINT IF EXISTS "{conname}"'))
+                    print(f"[CampusFind DB] Dropped old check constraint on users.role: {conname}", flush=True)
+
+                # Re-add updated check constraint
+                conn.execute(text("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role::text IN ('STUDENT', 'ADMIN', 'SECURITY'))"))
+                print("[CampusFind DB] Added updated users_role_check constraint", flush=True)
+            except Exception as e:
+                logger.warning(f"[!] users_role_check update notice: {e}")
+    except Exception as e:
+        logger.error(f"[-] _migrate_user_roles failed: {e}")
+
+
 def init_database():
     """
     Safely initialize the database:
     1. Create all missing tables in PostgreSQL / SQLite.
-    2. Ensure required schema columns exist.
-    3. Ensure required demo users (Admin and Student) exist and have correct active credentials.
+    2. Ensure required schema columns and constraints exist.
+    3. Ensure required demo users (Admin, Student, Security) exist and have correct active credentials.
     4. Safely seed the dataset items if CSV is available and database is empty.
     """
+    print("[CampusFind Startup] Initializing database schema...", flush=True)
     logger.info("[*] Initializing database schema...")
     Base.metadata.create_all(bind=engine)
 
@@ -107,15 +161,8 @@ def init_database():
         inspector = inspect(engine)
         tables = inspector.get_table_names()
 
-        # -- users: update role check constraint for PostgreSQL if needed
-        if "users" in tables and _is_postgres():
-            try:
-                with engine.begin() as conn:
-                    conn.execute(text("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check"))
-                    conn.execute(text("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('STUDENT', 'ADMIN', 'SECURITY'))"))
-                logger.info("[+] users_role_check constraint updated for SECURITY role")
-            except Exception as e:
-                logger.warning(f"[!] users_role_check constraint update notice: {e}")
+        # -- users: update role column length and check constraints for PostgreSQL
+        _migrate_user_roles(inspector)
 
         # -- item_timelines UUID type migration (PostgreSQL only)
         _migrate_item_timelines(inspector)
@@ -129,13 +176,10 @@ def init_database():
                 logger.info("[+] Added name_score column to matches table")
 
         # -- claims: add OTP and proof_image columns if missing
-        # Each column is migrated in its own transaction so a single failure
-        # does not roll back the other columns.
         if "claims" in tables:
             claim_cols = [c["name"] for c in inspector.get_columns("claims")]
             logger.info(f"[i] claims columns found: {claim_cols}")
 
-            # Define each migration: (column_name, ADD COLUMN DDL for postgres, ADD COLUMN DDL for sqlite)
             ts_type = "TIMESTAMP" if _is_postgres() else "DATETIME"
             claim_migrations = [
                 (
@@ -167,7 +211,6 @@ def init_database():
 
             for col_name, pg_sql, sqlite_sql in claim_migrations:
                 if col_name in claim_cols:
-                    logger.info(f"[i] claims.{col_name} — already exists, skipping")
                     continue
                 ddl = pg_sql if _is_postgres() else sqlite_sql
                 try:
@@ -179,10 +222,49 @@ def init_database():
     except Exception as e:
         logger.warning(f"[!] Schema migration step encountered an issue: {e}")
 
+    # Safe Diagnostic Check before and after synchronization
+    def _safe_user_diagnostic(stage: str):
+        diag_db = SessionLocal()
+        try:
+            sec_user = diag_db.query(User).filter(
+                (func.lower(User.email) == SECURITY_EMAIL.lower()) |
+                (User.student_id == SECURITY_STUDENT_ID)
+            ).first()
+
+            if sec_user:
+                role_val = sec_user.role.value if hasattr(sec_user.role, 'value') else sec_user.role
+                print(
+                    f"[CampusFind Security Diagnostic - {stage}] "
+                    f"exists=True, "
+                    f"role={role_val}, "
+                    f"student_id={sec_user.student_id}",
+                    flush=True
+                )
+            else:
+                print(
+                    f"[CampusFind Security Diagnostic - {stage}] "
+                    f"exists=False, "
+                    f"role=None, "
+                    f"student_id=None",
+                    flush=True
+                )
+        except Exception as err:
+            print(f"[CampusFind Security Diagnostic - {stage}] error querying user: {err}", flush=True)
+        finally:
+            diag_db.close()
+
+    print("[CampusFind Startup] Performing demo user verification and synchronization...", flush=True)
+    _safe_user_diagnostic("BEFORE_SYNC")
+
     # Synchronize demo users (Admin, Student STU001, Main Security Desk)
     # Each user is synchronized independently so an issue with one does not affect others.
     def _sync_user(email: str, password: str, name: str, role: UserRole, student_id: str | None = None):
+        is_security = (email.lower() == SECURITY_EMAIL.lower())
+        if is_security:
+            print(f"[CampusFind Security Diagnostic] synchronization_attempted=True", flush=True)
+
         db: Session = SessionLocal()
+        sync_success = False
         try:
             user = db.query(User).filter(
                 (func.lower(User.email) == email.lower()) | 
@@ -200,7 +282,9 @@ def init_database():
                 )
                 db.add(user)
                 db.commit()
+                sync_success = True
                 logger.info(f"[+] Demo user created: {email} (role: {role.value})")
+                print(f"[CampusFind Startup] Demo user created: {email} (role: {role.value})", flush=True)
             else:
                 user.name = name
                 user.email = email.lower()
@@ -211,16 +295,25 @@ def init_database():
                 if not verify_password(password, user.password_hash):
                     user.password_hash = hash_password(password)
                 db.commit()
+                sync_success = True
                 logger.info(f"[i] Demo user verified: {email} (role: {role.value})")
+                print(f"[CampusFind Startup] Demo user verified: {email} (role: {role.value})", flush=True)
         except Exception as err:
             db.rollback()
+            sync_success = False
             logger.error(f"[-] Failed to sync demo user {email}: {err}")
+            print(f"[CampusFind Startup Error] Failed to sync demo user {email}: {err}", flush=True)
         finally:
             db.close()
+
+        if is_security:
+            print(f"[CampusFind Security Diagnostic] synchronization_succeeded={sync_success}", flush=True)
 
     _sync_user(ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME, UserRole.ADMIN, student_id=None)
     _sync_user(STUDENT_EMAIL, STUDENT_PASSWORD, STUDENT_NAME, UserRole.STUDENT, student_id=STUDENT_ID)
     _sync_user(SECURITY_EMAIL, SECURITY_PASSWORD, SECURITY_NAME, UserRole.SECURITY, student_id=SECURITY_STUDENT_ID)
+
+    _safe_user_diagnostic("AFTER_SYNC")
 
     # Safely run dataset seeding if seed script exists and items table is empty
     db: Session = SessionLocal()
