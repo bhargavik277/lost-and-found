@@ -264,7 +264,7 @@ def test_expired_otp_and_returned_item_rejection():
     try:
         db_claim = db.query(Claim).filter(Claim.id == uuid.UUID(claim_id)).first()
         # Set expiration in past
-        db_claim.otp_expires_at = datetime.datetime.utcnow() - datetime.timedelta(days=1)
+        db_claim.otp_expires_at = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)
         db.commit()
     finally:
         db.close()
@@ -277,7 +277,7 @@ def test_expired_otp_and_returned_item_rejection():
     db = SessionLocal()
     try:
         db_claim = db.query(Claim).filter(Claim.id == uuid.UUID(claim_id)).first()
-        db_claim.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(days=3)
+        db_claim.otp_expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=3)
         db_item = db.query(Item).filter(Item.id == uuid.UUID(found_id)).first()
         db_item.status = ItemStatus.RETURNED
         db.commit()
@@ -292,7 +292,101 @@ def test_expired_otp_and_returned_item_rejection():
     assert "already been returned" in ret_res.json()["detail"].lower()
 
 
+def test_otp_regeneration_workflow():
+    uid = uuid.uuid4().hex[:6]
+    sec_login = client.post("/auth/login", json={"email": "security@campusfind.edu", "password": "security123"})
+    sec_headers = {"Authorization": f"Bearer {sec_login.json()['access_token']}"}
+
+    admin_login = client.post("/auth/login", json={"email": "admin@campusfind.edu", "password": "admin123"})
+    admin_headers = {"Authorization": f"Bearer {admin_login.json()['access_token']}"}
+
+    # Register finder
+    stu_finder = client.post("/auth/register", json={
+        "name": f"Finder {uid}",
+        "student_id": f"STU_F2_{uid}",
+        "email": f"finder_{uid}@campus.edu",
+        "password": "password123"
+    })
+    finder_headers = {"Authorization": f"Bearer {stu_finder.json()['access_token']}"}
+
+    # Register claimant
+    stu_claimant = client.post("/auth/register", json={
+        "name": f"Claimant {uid}",
+        "student_id": f"STU_C2_{uid}",
+        "email": f"claimant2_{uid}@campus.edu",
+        "password": "password123"
+    })
+    claimant_headers = {"Authorization": f"Bearer {stu_claimant.json()['access_token']}"}
+
+    # Found item
+    f_res = client.post("/items/found", data={
+        "item_name": f"Lab Glasses {uid}",
+        "category": "Personal Items",
+        "location": "Chemistry Lab",
+        "date_reported": "2026-09-20",
+        "description": "Safety glasses in blue case",
+    }, headers=finder_headers)
+    found_id = f_res.json()["id"]
+
+    # Submit claim
+    c_res = client.post("/claims", json={
+        "item_id": found_id,
+        "proof_description": "Blue case with chemical formula sticker",
+    }, headers=claimant_headers)
+    claim_id = c_res.json()["id"]
+
+    # Admin approves claim
+    client.patch(f"/admin/claims/{claim_id}/review", json={"status": "APPROVED"}, headers=admin_headers)
+
+    # Initial OTP
+    initial_otp_res = client.get(f"/claims/{claim_id}/otp", headers=claimant_headers)
+    initial_otp = initial_otp_res.json()["otp"]
+    assert len(initial_otp) == 6
+
+    # Expire initial OTP
+    db = SessionLocal()
+    try:
+        db_claim = db.query(Claim).filter(Claim.id == uuid.UUID(claim_id)).first()
+        db_claim.otp_expires_at = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=2)
+        db.commit()
+    finally:
+        db.close()
+
+    # Verify expired OTP fails at Security Desk
+    expired_verify = client.post(f"/security/collections/{claim_id}/verify-otp", json={"otp": initial_otp}, headers=sec_headers)
+    assert expired_verify.status_code == 400
+    assert "expired" in expired_verify.json()["detail"].lower()
+
+    # Regenerate OTP as claimant
+    regen_res = client.post(f"/claims/{claim_id}/regenerate-otp", headers=claimant_headers)
+    assert regen_res.status_code == 200
+    new_otp = regen_res.json()["otp"]
+    assert len(new_otp) == 6
+    assert new_otp != initial_otp
+
+    # Check previous OTP is now rejected
+    old_verify = client.post(f"/security/collections/{claim_id}/verify-otp", json={"otp": initial_otp}, headers=sec_headers)
+    assert old_verify.status_code == 400
+    assert "invalid collection otp" in old_verify.json()["detail"].lower()
+
+    # Check timeline has OTP_REGENERATED event
+    db = SessionLocal()
+    try:
+        timelines = db.query(ItemTimeline).filter(ItemTimeline.item_id == uuid.UUID(found_id)).all()
+        assert any(t.status == "OTP_REGENERATED" for t in timelines)
+    finally:
+        db.close()
+
+    # Security verifies with new OTP successfully
+    verify_new = client.post(f"/security/collections/{claim_id}/verify-otp", json={"otp": new_otp}, headers=sec_headers)
+    assert verify_new.status_code == 200
+    assert verify_new.json()["success"] is True
+    assert verify_new.json()["status"] == "RETURNED"
+
+
 if __name__ == "__main__":
     test_security_desk_complete_workflow()
     test_expired_otp_and_returned_item_rejection()
-    print("\nALL 14 SECURITY DESK WORKFLOW TESTS PASSED PERFECTLY!")
+    test_otp_regeneration_workflow()
+    print("\nALL SECURITY DESK WORKFLOW & OTP TESTS PASSED PERFECTLY!")
+

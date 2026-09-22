@@ -2,7 +2,7 @@ import logging
 import uuid as _uuid_mod
 from typing import Optional, Union
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.models.timeline import ItemTimeline
 
@@ -39,7 +39,7 @@ def record_timeline_event(
             actor_role=actor_role,
             actor_name=actor_name,
             note=note,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
         db.add(event)
         # We do not do a separate commit here to allow it to be atomic with parent transaction

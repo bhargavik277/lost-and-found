@@ -63,6 +63,7 @@ export const claimsAPI = {
   myClaims: () => api.get('/claims/my'),
   get: (id) => api.get(`/claims/${id}`),
   getOtp: (id) => api.get(`/claims/${id}/otp`),
+  regenerateOtp: (id) => api.post(`/claims/${id}/regenerate-otp`),
 }
 
 // ── Notifications ─────────────────────────────────────────────────────────────
@@ -83,6 +84,7 @@ export const adminAPI = {
   getClaim: (id) => api.get(`/admin/claims/${id}`),
   reviewClaim: (id, data) => api.patch(`/admin/claims/${id}/review`, data),
   verifyOtp: (id, otp) => api.post(`/admin/claims/${id}/verify-otp`, { otp }),
+  regenerateOtp: (id) => api.post(`/admin/claims/${id}/regenerate-otp`),
   users: () => api.get('/admin/users'),
 }
 

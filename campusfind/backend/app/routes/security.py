@@ -1,5 +1,5 @@
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -62,7 +62,7 @@ def security_verify_collection_otp(
             item_name=item.item_name if item else "Item",
             claimant_name=claimant.name if claimant else "Student",
             student_id=claimant.student_id if claimant else None,
-            collected_at=datetime.utcnow(),
+            collected_at=datetime.now(timezone.utc),
             status="RETURNED",
         )
     except ValueError as e:

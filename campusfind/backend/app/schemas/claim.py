@@ -109,3 +109,15 @@ class SecurityVerificationResponse(BaseModel):
     status: str = "RETURNED"
 
 
+class OTPResponse(BaseModel):
+    """OTP retrieval and regeneration response schema."""
+    claim_id: UUID
+    otp: Optional[str] = None
+    expires_at: Optional[datetime] = None
+    is_otp_used: bool = False
+    collection_location: str = "Main Campus Security Desk (Administration Building, Room 102)"
+    collection_instructions: str = "Show this 6-digit code along with your Student ID to the security officer to complete collection."
+    message: Optional[str] = None
+
+
+

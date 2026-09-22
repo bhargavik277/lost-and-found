@@ -74,6 +74,11 @@ ADMIN_EMAIL = "admin@campusfind.edu"
 ADMIN_PASSWORD = "admin123"
 ADMIN_NAME = "CampusFind Admin"
 
+SECURITY_EMAIL = "security@campusfind.edu"
+SECURITY_PASSWORD = "security123"
+SECURITY_NAME = "Main Security Desk"
+SECURITY_STUDENT_ID = "SECURITY-DESK"
+
 # Status mapping: CSV → ItemStatus enum
 STATUS_MAP = {
     "Active": ItemStatus.ACTIVE,
@@ -121,7 +126,7 @@ def seed():
     db = SessionLocal()
 
     try:
-        # ── Create admin user ────────────────────────────────────────────────
+        # ── Create / verify admin user ────────────────────────────────────────
         admin = db.query(User).filter(User.email == ADMIN_EMAIL).first()
         if not admin:
             admin = User(
@@ -136,7 +141,31 @@ def seed():
             db.refresh(admin)
             print(f"[+] Admin created: {ADMIN_EMAIL} / {ADMIN_PASSWORD}")
         else:
-            print(f"[i] Admin already exists: {ADMIN_EMAIL}")
+            admin.role = UserRole.ADMIN
+            admin.password_hash = hash_password(ADMIN_PASSWORD)
+            db.commit()
+            print(f"[i] Admin verified: {ADMIN_EMAIL}")
+
+        # ── Create / verify security user ─────────────────────────────────────
+        sec = db.query(User).filter(User.email == SECURITY_EMAIL).first()
+        if not sec:
+            sec = User(
+                name=SECURITY_NAME,
+                email=SECURITY_EMAIL,
+                password_hash=hash_password(SECURITY_PASSWORD),
+                role=UserRole.SECURITY,
+                student_id=SECURITY_STUDENT_ID,
+            )
+            db.add(sec)
+            db.commit()
+            db.refresh(sec)
+            print(f"[+] Security Desk created: {SECURITY_EMAIL} / {SECURITY_PASSWORD}")
+        else:
+            sec.role = UserRole.SECURITY
+            sec.password_hash = hash_password(SECURITY_PASSWORD)
+            sec.student_id = SECURITY_STUDENT_ID
+            db.commit()
+            print(f"[i] Security Desk verified: {SECURITY_EMAIL}")
 
         # ── Read CSV ─────────────────────────────────────────────────────────
         if not CSV_PATH.exists():

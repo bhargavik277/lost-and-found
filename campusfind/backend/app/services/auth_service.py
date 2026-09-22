@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 from jose import jwt, JWTError
@@ -26,11 +26,12 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_access_token(user_id: str, role: str) -> str:
+    now = datetime.now(timezone.utc)
     payload = {
         "sub": user_id,
         "role": role,
-        "exp": datetime.utcnow() + timedelta(days=settings.JWT_EXPIRE_DAYS),
-        "iat": datetime.utcnow(),
+        "exp": now + timedelta(days=settings.JWT_EXPIRE_DAYS),
+        "iat": now,
     }
     return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 

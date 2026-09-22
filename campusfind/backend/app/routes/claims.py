@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User, UserRole
 from app.models.item import Item
-from app.models.claim import Claim
-from app.schemas.claim import ClaimCreate, ClaimReview, ClaimOut, ClaimOutAdmin
+from app.models.claim import Claim, ClaimStatus
+from app.schemas.claim import ClaimCreate, ClaimReview, ClaimOut, ClaimOutAdmin, OTPResponse
 from app.services.auth_service import get_current_user
 from app.services.claim_service import (
-    create_claim, get_claim, get_user_claims, review_claim
+    create_claim, get_claim, get_user_claims, review_claim, regenerate_claim_otp
 )
 from app.services.notification_service import create_notification
 from app.models.notification import NotificationType
@@ -83,28 +83,48 @@ def get_claim_detail(
     return claim
 
 
-@router.get("/{claim_id}/otp")
+@router.get("/{claim_id}/otp", response_model=OTPResponse)
 def get_claim_otp(
     claim_id: UUID,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Retrieve collection OTP for an approved claim — claimant only."""
+    """Retrieve collection OTP for an approved claim — claimant only (or Admin)."""
     claim = db.query(Claim).filter(Claim.id == claim_id).first()
     if not claim:
         raise HTTPException(status_code=404, detail="Claim not found.")
     if claim.user_id != current_user.id and current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Unauthorized to view this collection OTP.")
-    if claim.status != "APPROVED":
+    if claim.status != ClaimStatus.APPROVED:
         raise HTTPException(status_code=400, detail="Claim is not approved yet.")
-    return {
-        "claim_id": str(claim.id),
-        "otp": claim.otp_plain,
-        "is_otp_used": claim.is_otp_used,
-        "expires_at": claim.otp_expires_at,
-        "collection_location": "Main Campus Security Desk (Administration Building, Room 102)",
-        "collection_instructions": "Show this 6-digit code along with your Student ID to the security officer to complete collection.",
-    }
+    return OTPResponse(
+        claim_id=claim.id,
+        otp=claim.otp_plain,
+        is_otp_used=claim.is_otp_used,
+        expires_at=claim.otp_expires_at,
+        collection_location="Main Campus Security Desk (Administration Building, Room 102)",
+        collection_instructions="Show this 6-digit code along with your Student ID to the security officer to complete collection.",
+    )
+
+
+@router.post("/{claim_id}/regenerate-otp", response_model=OTPResponse)
+def regenerate_otp(
+    claim_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Regenerate a fresh 6-digit collection OTP for an approved claim (Claimant or Admin)."""
+    try:
+        claim, raw_otp = regenerate_claim_otp(db, claim_id, current_user)
+        return OTPResponse(
+            claim_id=claim.id,
+            otp=raw_otp,
+            expires_at=claim.otp_expires_at,
+            is_otp_used=claim.is_otp_used,
+            message="New collection OTP generated successfully. Previous OTP has been invalidated.",
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch("/{claim_id}/approve", response_model=ClaimOut)
@@ -121,4 +141,5 @@ def approve_claim(
     if not claim:
         raise HTTPException(status_code=404, detail="Claim not found.")
     return review_claim(db, claim, data, current_user.id)
+
 

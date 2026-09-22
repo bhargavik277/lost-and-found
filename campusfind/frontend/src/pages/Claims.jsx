@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { claimsAPI } from '../services/api'
-import { ShieldCheck, Clock, CheckCircle2, XCircle, ArrowLeft, AlertCircle, FileText, Building2, KeyRound } from 'lucide-react'
+import { ShieldCheck, Clock, CheckCircle2, XCircle, ArrowLeft, AlertCircle, FileText, Building2, KeyRound, RefreshCw } from 'lucide-react'
 
 export default function Claims() {
   const [claims, setClaims] = useState([])
   const [loading, setLoading] = useState(true)
+  const [regeneratingId, setRegeneratingId] = useState(null)
+  const [regenMsg, setRegenMsg] = useState(null)
 
   const fetchClaims = async () => {
     setLoading(true)
@@ -16,6 +18,29 @@ export default function Claims() {
       // ignore
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleRegenerateOtp = async (claimId) => {
+    setRegeneratingId(claimId)
+    setRegenMsg(null)
+    try {
+      const res = await claimsAPI.regenerateOtp(claimId)
+      setRegenMsg({ type: 'success', text: 'New 6-digit Collection OTP generated successfully!' })
+      setClaims((prev) =>
+        prev.map((c) =>
+          c.id === claimId
+            ? { ...c, otp_plain: res.data.otp, otp_expires_at: res.data.expires_at, is_otp_used: false }
+            : c
+        )
+      )
+    } catch (err) {
+      setRegenMsg({
+        type: 'error',
+        text: err.response?.data?.detail || 'Failed to regenerate OTP. Please try again.',
+      })
+    } finally {
+      setRegeneratingId(null)
     }
   }
 
@@ -55,6 +80,20 @@ export default function Claims() {
           </p>
         </div>
       </div>
+
+      {regenMsg && (
+        <div className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+          regenMsg.type === 'success'
+            ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
+            : 'bg-rose-950/40 border-rose-500/30 text-rose-300'
+        }`}>
+          <div className="flex items-center gap-2">
+            {regenMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+            <span>{regenMsg.text}</span>
+          </div>
+          <button onClick={() => setRegenMsg(null)} className="text-[11px] underline cursor-pointer hover:opacity-80">Dismiss</button>
+        </div>
+      )}
 
       {loading ? (
         <div className="card py-16 flex justify-center">
@@ -101,12 +140,23 @@ export default function Claims() {
                 {claim.status === 'APPROVED' && (
                   !claim.is_otp_used ? (
                     <div className="p-4 bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl text-xs text-emerald-200 space-y-3 shadow-lg">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                        <span className="font-bold text-sm text-emerald-300">Claim Approved — Ready for Pickup!</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                          <span className="font-bold text-sm text-emerald-300">Claim Approved — Ready for Pickup!</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRegenerateOtp(claim.id)}
+                          disabled={regeneratingId === claim.id}
+                          className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-lg font-semibold text-[11px] transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-3 h-3 ${regeneratingId === claim.id ? 'animate-spin' : ''}`} />
+                          {regeneratingId === claim.id ? 'Regenerating...' : 'Regenerate OTP'}
+                        </button>
                       </div>
 
-                      <div className="p-4 bg-slate-950/80 rounded-xl border border-emerald-500/30 text-center space-y-1">
+                      <div className="p-4 bg-slate-950/80 rounded-xl border border-emerald-500/30 text-center space-y-1.5">
                         <div className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold flex items-center justify-center gap-1">
                           <KeyRound className="w-3.5 h-3.5 text-amber-400" /> Your Collection OTP
                         </div>
@@ -116,6 +166,11 @@ export default function Claims() {
                         <div className="text-[11px] text-slate-400">
                           Present this 6-digit code along with your Student ID at the Main Security Desk
                         </div>
+                        {claim.otp_expires_at && (
+                          <div className="text-[10px] text-slate-400">
+                            Valid until: <span className="text-slate-300">{new Date(claim.otp_expires_at).toLocaleString()}</span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="text-[11px] text-slate-300 flex items-center gap-1.5">

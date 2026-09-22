@@ -11,11 +11,11 @@ from app.models.match import Match, MatchStatus
 from app.models.claim import Claim, ClaimStatus
 from app.models.survey import SurveyResponse
 from app.schemas.item import ItemOut, ItemUpdate
-from app.schemas.claim import ClaimOutAdmin, ClaimReview, ClaimVerifyOTP
+from app.schemas.claim import ClaimOutAdmin, ClaimReview, ClaimVerifyOTP, OTPResponse
 from app.schemas.user import UserOut
 from app.services.auth_service import get_current_user, require_admin
 from app.services.item_service import get_item, update_item, delete_item, archive_item
-from app.services.claim_service import get_claim, get_all_claims, review_claim, verify_claim_otp
+from app.services.claim_service import get_claim, get_all_claims, review_claim, verify_claim_otp, regenerate_claim_otp
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -128,6 +128,27 @@ def admin_verify_claim_otp(
         return verify_claim_otp(db, claim_id, data.otp, current_user)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/claims/{claim_id}/regenerate-otp", response_model=OTPResponse)
+def admin_regenerate_claim_otp(
+    claim_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    """Admin regenerates the 6-digit collection OTP for an approved claim."""
+    try:
+        claim, raw_otp = regenerate_claim_otp(db, claim_id, current_user)
+        return OTPResponse(
+            claim_id=claim.id,
+            otp=raw_otp,
+            expires_at=claim.otp_expires_at,
+            is_otp_used=claim.is_otp_used,
+            message="New collection OTP generated successfully. Previous OTP has been invalidated.",
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 
 
