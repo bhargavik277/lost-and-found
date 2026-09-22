@@ -95,9 +95,15 @@ def _migrate_item_timelines(inspector):
 def _migrate_user_roles(inspector):
     """
     Safely migrates users.role in PostgreSQL:
-    1. Expands column type to VARCHAR(50) if varchar to prevent length truncation.
-    2. Updates native PostgreSQL enum 'userrole' if present.
-    3. Drops old check constraints on users.role and adds updated constraint.
+    1. Checks role column length BEFORE migration and logs diagnostic.
+    2. Dynamically drops old check constraints on users.role.
+    3. Executes and commits: ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(50) USING role::text.
+    4. Updates native PostgreSQL enum 'userrole' if present (safely in isolated autocommit transaction).
+    5. Adds updated check constraint allowing STUDENT, ADMIN, SECURITY.
+    6. Verifies column length and constraints AFTER migration and logs diagnostics.
+
+    Each operation executes in an independent, dedicated transaction/connection
+    to prevent transaction aborts from rolling back DDL changes.
     """
     if not _is_postgres():
         return
@@ -105,44 +111,113 @@ def _migrate_user_roles(inspector):
     if "users" not in inspector.get_table_names():
         return
 
+    # 1. Query role column length BEFORE migration
+    try:
+        with engine.connect() as conn:
+            res = conn.execute(text("""
+                SELECT character_maximum_length, data_type, udt_name
+                FROM information_schema.columns
+                WHERE table_name = 'users' AND column_name = 'role'
+            """)).fetchone()
+            if res:
+                before_len = res[0]
+                before_type = res[1]
+                before_udt = res[2]
+                print(
+                    f"[CampusFind DB] users.role length BEFORE migration: "
+                    f"character_maximum_length={before_len}, data_type={before_type}, udt_name={before_udt}",
+                    flush=True
+                )
+            else:
+                print("[CampusFind DB] users.role length BEFORE migration: column not found in information_schema", flush=True)
+    except Exception as e:
+        print(f"[CampusFind DB] users.role length BEFORE migration check failed: {e}", flush=True)
+
+    # 2. Dynamically find and drop all check constraints on users.role
+    try:
+        constraint_names = []
+        with engine.connect() as conn:
+            constraints_query = text("""
+                SELECT c.conname 
+                FROM pg_constraint c
+                JOIN pg_class cl ON cl.oid = c.conrelid
+                JOIN pg_attribute a ON a.attrelid = cl.oid AND a.attnum = ANY(c.conkey)
+                WHERE cl.relname = 'users' AND a.attname = 'role' AND c.contype = 'c';
+            """)
+            rows = conn.execute(constraints_query).fetchall()
+            constraint_names = [r[0] for r in rows]
+
+        for conname in constraint_names:
+            try:
+                with engine.begin() as conn:
+                    conn.execute(text(f'ALTER TABLE users DROP CONSTRAINT IF EXISTS "{conname}"'))
+                print(f"[CampusFind DB] Dropped old check constraint on users.role: {conname}", flush=True)
+            except Exception as ce:
+                print(f"[CampusFind DB] Notice dropping constraint {conname}: {ce}", flush=True)
+    except Exception as e:
+        print(f"[CampusFind DB] Notice searching check constraints on users.role: {e}", flush=True)
+
+    # 3. Alter role column to VARCHAR(50) USING role::text in an independent transaction
     try:
         with engine.begin() as conn:
-            # 1. Expand column length if varchar
-            try:
-                conn.execute(text("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(50)"))
-                print("[CampusFind DB] users.role column expanded to VARCHAR(50)", flush=True)
-            except Exception as e:
-                logger.info(f"[i] users.role length alter notice: {e}")
+            conn.execute(text("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(50) USING role::text"))
+        print("[CampusFind DB] users.role migration committed: ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(50) USING role::text", flush=True)
+    except Exception as e:
+        print(f"[CampusFind DB] users.role migration failed: {e}", flush=True)
 
-            # 2. Add 'SECURITY' to any native enum type if present
-            try:
+    # 4. Handle native PostgreSQL enum if present (in isolated autocommit mode)
+    try:
+        enum_exists = False
+        with engine.connect() as conn:
+            res = conn.execute(text("SELECT 1 FROM pg_type WHERE typname = 'userrole'")).scalar()
+            enum_exists = bool(res)
+
+        if enum_exists:
+            with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
                 conn.execute(text("ALTER TYPE userrole ADD VALUE IF NOT EXISTS 'SECURITY'"))
                 print("[CampusFind DB] PostgreSQL enum 'userrole' updated with 'SECURITY'", flush=True)
-            except Exception as e:
-                logger.info(f"[i] ALTER TYPE userrole notice: {e}")
-
-            # 3. Drop all old check constraints on users.role
-            try:
-                constraints_query = text("""
-                    SELECT c.conname 
-                    FROM pg_constraint c
-                    JOIN pg_class cl ON cl.oid = c.conrelid
-                    JOIN pg_attribute a ON a.attrelid = cl.oid AND a.attnum = ANY(c.conkey)
-                    WHERE cl.relname = 'users' AND a.attname = 'role' AND c.contype = 'c';
-                """)
-                result = conn.execute(constraints_query).fetchall()
-                for row in result:
-                    conname = row[0]
-                    conn.execute(text(f'ALTER TABLE users DROP CONSTRAINT IF EXISTS "{conname}"'))
-                    print(f"[CampusFind DB] Dropped old check constraint on users.role: {conname}", flush=True)
-
-                # Re-add updated check constraint
-                conn.execute(text("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role::text IN ('STUDENT', 'ADMIN', 'SECURITY'))"))
-                print("[CampusFind DB] Added updated users_role_check constraint", flush=True)
-            except Exception as e:
-                logger.warning(f"[!] users_role_check update notice: {e}")
     except Exception as e:
-        logger.error(f"[-] _migrate_user_roles failed: {e}")
+        print(f"[CampusFind DB] Notice on PostgreSQL enum update: {e}", flush=True)
+
+    # 5. Add updated check constraint allowing STUDENT, ADMIN, SECURITY in an independent transaction
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role::text IN ('STUDENT', 'ADMIN', 'SECURITY'))"))
+        print("[CampusFind DB] Added updated users_role_check constraint: ('STUDENT', 'ADMIN', 'SECURITY')", flush=True)
+    except Exception as e:
+        print(f"[CampusFind DB] Notice adding users_role_check constraint: {e}", flush=True)
+
+    # 6. Verify column length and active constraints AFTER migration
+    try:
+        with engine.connect() as conn:
+            res = conn.execute(text("""
+                SELECT character_maximum_length, data_type, udt_name
+                FROM information_schema.columns
+                WHERE table_name = 'users' AND column_name = 'role'
+            """)).fetchone()
+            if res:
+                after_len = res[0]
+                after_type = res[1]
+                after_udt = res[2]
+                print(
+                    f"[CampusFind DB] users.role length AFTER migration: "
+                    f"character_maximum_length={after_len}, data_type={after_type}, udt_name={after_udt}",
+                    flush=True
+                )
+            else:
+                print("[CampusFind DB] users.role length AFTER migration: column not found", flush=True)
+
+            constraints_query = text("""
+                SELECT c.conname, pg_get_constraintdef(c.oid)
+                FROM pg_constraint c
+                JOIN pg_class cl ON cl.oid = c.conrelid
+                JOIN pg_attribute a ON a.attrelid = cl.oid AND a.attnum = ANY(c.conkey)
+                WHERE cl.relname = 'users' AND a.attname = 'role' AND c.contype = 'c';
+            """)
+            active_constraints = conn.execute(constraints_query).fetchall()
+            print(f"[CampusFind DB] users.role active constraints: {active_constraints}", flush=True)
+    except Exception as e:
+        print(f"[CampusFind DB] Error querying users.role AFTER migration: {e}", flush=True)
 
 
 def init_database():
@@ -234,18 +309,14 @@ def init_database():
             if sec_user:
                 role_val = sec_user.role.value if hasattr(sec_user.role, 'value') else sec_user.role
                 print(
-                    f"[CampusFind Security Diagnostic - {stage}] "
-                    f"exists=True, "
-                    f"role={role_val}, "
-                    f"student_id={sec_user.student_id}",
+                    f"[CampusFind Security Diagnostic - {stage}]\n"
+                    f"exists=True, role={role_val}, student_id={sec_user.student_id}",
                     flush=True
                 )
             else:
                 print(
-                    f"[CampusFind Security Diagnostic - {stage}] "
-                    f"exists=False, "
-                    f"role=None, "
-                    f"student_id=None",
+                    f"[CampusFind Security Diagnostic - {stage}]\n"
+                    f"exists=False, role=None, student_id=None",
                     flush=True
                 )
         except Exception as err:
@@ -261,7 +332,7 @@ def init_database():
     def _sync_user(email: str, password: str, name: str, role: UserRole, student_id: str | None = None):
         is_security = (email.lower() == SECURITY_EMAIL.lower())
         if is_security:
-            print(f"[CampusFind Security Diagnostic] synchronization_attempted=True", flush=True)
+            print("[CampusFind Security Diagnostic]\nsynchronization_attempted=True", flush=True)
 
         db: Session = SessionLocal()
         sync_success = False
@@ -303,11 +374,13 @@ def init_database():
             sync_success = False
             logger.error(f"[-] Failed to sync demo user {email}: {err}")
             print(f"[CampusFind Startup Error] Failed to sync demo user {email}: {err}", flush=True)
+            if is_security:
+                print(f"[CampusFind Security Sync Exception] Database exception during security user sync: {type(err).__name__}: {err}", flush=True)
         finally:
             db.close()
 
         if is_security:
-            print(f"[CampusFind Security Diagnostic] synchronization_succeeded={sync_success}", flush=True)
+            print(f"[CampusFind Security Diagnostic]\nsynchronization_succeeded={sync_success}", flush=True)
 
     _sync_user(ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME, UserRole.ADMIN, student_id=None)
     _sync_user(STUDENT_EMAIL, STUDENT_PASSWORD, STUDENT_NAME, UserRole.STUDENT, student_id=STUDENT_ID)
