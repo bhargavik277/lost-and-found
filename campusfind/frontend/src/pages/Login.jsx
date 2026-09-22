@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
 import { authAPI } from '../services/api'
-import { Compass, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, User } from 'lucide-react'
+import { Compass, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, User, Shield } from 'lucide-react'
 
 export default function Login() {
   const { login } = useAuth()
@@ -23,6 +23,8 @@ export default function Login() {
       login(access_token, user)
       if (user.role === 'ADMIN') {
         navigate('/admin')
+      } else if (user.role === 'SECURITY') {
+        navigate('/security')
       } else {
         navigate('/dashboard')
       }
@@ -37,6 +39,9 @@ export default function Login() {
     if (role === 'admin') {
       setEmail('admin@campusfind.edu')
       setPassword('admin123')
+    } else if (role === 'security') {
+      setEmail('security@campusfind.edu')
+      setPassword('security123')
     } else {
       setEmail('stu001@campus.edu')
       setPassword('STU001')
@@ -58,20 +63,27 @@ export default function Login() {
         {/* Quick Demo Fill Pills */}
         <div className="p-3 bg-slate-850 rounded-xl border border-slate-750 space-y-2 text-xs">
           <div className="text-slate-400 font-medium">Quick Demo Accounts:</div>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-1.5">
             <button
               type="button"
               onClick={() => fillDemo('student')}
-              className="flex-1 py-1.5 px-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1"
+              className="py-1.5 px-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1 text-[11px]"
             >
-              <User className="w-3.5 h-3.5" /> Student Demo
+              <User className="w-3 h-3" /> Student
             </button>
             <button
               type="button"
               onClick={() => fillDemo('admin')}
-              className="flex-1 py-1.5 px-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1"
+              className="py-1.5 px-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1 text-[11px]"
             >
-              <ShieldCheck className="w-3.5 h-3.5" /> Admin Demo
+              <ShieldCheck className="w-3 h-3" /> Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemo('security')}
+              className="py-1.5 px-2 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1 text-[11px]"
+            >
+              <Shield className="w-3 h-3" /> Security
             </button>
           </div>
         </div>

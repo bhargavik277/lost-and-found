@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { claimsAPI } from '../services/api'
-import { ShieldCheck, Clock, CheckCircle2, XCircle, ArrowLeft, AlertCircle, FileText } from 'lucide-react'
+import { ShieldCheck, Clock, CheckCircle2, XCircle, ArrowLeft, AlertCircle, FileText, Building2, KeyRound } from 'lucide-react'
 
 export default function Claims() {
   const [claims, setClaims] = useState([])
@@ -99,12 +99,38 @@ export default function Claims() {
                 )}
 
                 {claim.status === 'APPROVED' && (
-                  <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-xs text-emerald-200 flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <strong>Collection Instructions:</strong> Please visit the Main Campus Security Desk with your Student ID to pick up your item during working hours (9 AM - 5 PM).
+                  !claim.is_otp_used ? (
+                    <div className="p-4 bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl text-xs text-emerald-200 space-y-3 shadow-lg">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                        <span className="font-bold text-sm text-emerald-300">Claim Approved — Ready for Pickup!</span>
+                      </div>
+
+                      <div className="p-4 bg-slate-950/80 rounded-xl border border-emerald-500/30 text-center space-y-1">
+                        <div className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold flex items-center justify-center gap-1">
+                          <KeyRound className="w-3.5 h-3.5 text-amber-400" /> Your Collection OTP
+                        </div>
+                        <div className="text-2xl font-mono font-bold tracking-[0.25em] text-amber-400">
+                          {claim.otp_plain || 'Available at Desk'}
+                        </div>
+                        <div className="text-[11px] text-slate-400">
+                          Present this 6-digit code along with your Student ID at the Main Security Desk
+                        </div>
+                      </div>
+
+                      <div className="text-[11px] text-slate-300 flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span><strong>Collection Station:</strong> Main Campus Security Desk (Administration Building, Room 102)</span>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="p-3.5 bg-emerald-950/30 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 flex items-center gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <div>
+                        <strong>Item Handover Complete:</strong> You collected this item from the Main Security Desk. Status is <strong>RETURNED</strong>.
+                      </div>
+                    </div>
+                  )
                 )}
               </div>
             )

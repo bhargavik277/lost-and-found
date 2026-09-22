@@ -28,6 +28,9 @@ import AdminItems from './pages/admin/AdminItems'
 import AdminClaims from './pages/admin/AdminClaims'
 import AdminUsers from './pages/admin/AdminUsers'
 
+// Security Desk Pages
+import SecurityDashboard from './pages/security/SecurityDashboard'
+
 export default function App() {
   return (
     <AuthProvider>
@@ -146,6 +149,16 @@ export default function App() {
                 element={
                   <ProtectedRoute requireAdmin>
                     <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Security Desk Protected Route */}
+              <Route
+                path="/security"
+                element={
+                  <ProtectedRoute allowedRoles={['SECURITY', 'ADMIN']}>
+                    <SecurityDashboard />
                   </ProtectedRoute>
                 }
               />

@@ -71,3 +71,12 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
             detail="You do not have permission to perform this action.",
         )
     return current_user
+
+
+def require_security_or_admin(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role not in (UserRole.SECURITY, UserRole.ADMIN):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Security or Admin access required to access this resource.",
+        )
+    return current_user

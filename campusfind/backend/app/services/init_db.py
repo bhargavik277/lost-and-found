@@ -20,6 +20,11 @@ STUDENT_ID = "STU001"
 STUDENT_PASSWORD = "STU001"
 STUDENT_NAME = "Student STU001"
 
+SECURITY_EMAIL = "security@campusfind.edu"
+SECURITY_PASSWORD = "security123"
+SECURITY_NAME = "Main Security Desk"
+SECURITY_STUDENT_ID = "SECURITY-DESK"
+
 
 def _is_postgres() -> bool:
     """Returns True if the connected database dialect is PostgreSQL."""
@@ -212,9 +217,33 @@ def init_database():
             student.is_active = True
             logger.info(f"[i] Demo student verified: {STUDENT_EMAIL}")
 
+        # 3. Ensure Security Demo (Main Security Desk) exists and has valid credentials
+        security = db.query(User).filter(
+            (func.lower(User.email) == SECURITY_EMAIL.lower()) | (User.student_id == SECURITY_STUDENT_ID)
+        ).first()
+        if not security:
+            security = User(
+                name=SECURITY_NAME,
+                student_id=SECURITY_STUDENT_ID,
+                email=SECURITY_EMAIL.lower(),
+                password_hash=hash_password(SECURITY_PASSWORD),
+                role=UserRole.SECURITY,
+                is_active=True,
+            )
+            db.add(security)
+            logger.info(f"[+] Demo security desk created: {SECURITY_EMAIL}")
+        else:
+            if not verify_password(SECURITY_PASSWORD, security.password_hash):
+                security.password_hash = hash_password(SECURITY_PASSWORD)
+            security.email = SECURITY_EMAIL.lower()
+            security.student_id = SECURITY_STUDENT_ID
+            security.role = UserRole.SECURITY
+            security.is_active = True
+            logger.info(f"[i] Demo security desk verified: {SECURITY_EMAIL}")
+
         db.commit()
 
-        # 3. Safely run dataset seeding if seed script exists and items table is empty
+        # 4. Safely run dataset seeding if seed script exists and items table is empty
         from app.models.item import Item
         if db.query(Item).count() == 0:
             logger.info("[*] Items table is empty — attempting CSV dataset seed...")

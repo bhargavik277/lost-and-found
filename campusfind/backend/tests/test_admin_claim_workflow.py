@@ -139,6 +139,13 @@ def test_admin_claim_workflow_relationships():
     assert reviewed_claim['admin_note'] == 'Serial and bluetooth name verified in person. Released to student.'
     assert reviewed_claim['item']['id'] == found_id
 
+    # 10b. Student retrieves OTP and Security/Admin verifies OTP at handover desk
+    otp_res = client.get(f'/claims/{claim_id}/otp', headers=charlie_headers)
+    assert otp_res.status_code == 200
+    otp = otp_res.json()['otp']
+    verify_res = client.post(f'/security/collections/{claim_id}/verify-otp', json={'otp': otp}, headers=admin_headers)
+    assert verify_res.status_code == 200
+
     # 11. Verify item status updated to RETURNED
     found_check = client.get(f'/items/{found_id}')
     assert found_check.status_code == 200

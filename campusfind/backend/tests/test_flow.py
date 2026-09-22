@@ -89,6 +89,14 @@ def test_full_lifecycle():
     assert review_res.status_code == 200
     print("[+] Admin approved claim:", review_res.json()['status'])
 
+    # 6b. Student gets collection OTP and Security Desk verifies it
+    otp_res = client.get(f'/claims/{claim_id}/otp', headers=stu_headers)
+    assert otp_res.status_code == 200
+    otp = otp_res.json()['otp']
+    verify_res = client.post(f'/security/collections/{claim_id}/verify-otp', json={'otp': otp}, headers=admin_headers)
+    assert verify_res.status_code == 200
+    print("[+] Security Desk verified OTP:", verify_res.json()['status'])
+
     # 7. Check item status updated to RETURNED
     item_check = client.get(f'/items/{found_id}')
     assert item_check.json()['status'] == 'RETURNED'

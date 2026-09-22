@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.models.claim import Claim, ClaimStatus
 from app.models.item import Item, ItemStatus, ReportType
 from app.models.match import Match
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.models.timeline import ItemTimeline
 from app.schemas.claim import ClaimCreate, ClaimReview, EvidenceStrengthInfo
 from app.services.notification_service import create_notification
@@ -314,8 +314,9 @@ def review_claim(
         claim.is_otp_used = False
 
         if item:
-            item.status = ItemStatus.RETURNED
-            item.recovered = True
+            # Item remains CLAIMED / staged for collection until Security verifies OTP
+            item.status = ItemStatus.CLAIMED
+            item.updated_at = datetime.utcnow()
 
         # Record timeline events
         record_timeline_event(
@@ -337,17 +338,38 @@ def review_claim(
             note="Item is staged at Main Campus Security Desk for handover.",
         )
 
-        # Notify claimant with OTP and instructions
+        item_title = item.item_name if item else "item"
+
+        # 1. Notify claimant with OTP and instructions
         create_notification(
             db,
             user_id=claim.user_id,
             message=(
-                f"Your claim for '{item.item_name if item else 'item'}' has been approved! "
+                f"Your claim for '{item_title}' has been approved! "
                 f"Your Collection OTP is {raw_otp}. Please visit the Main Security Desk to collect your item."
             ),
             notif_type=NotificationType.CLAIM_APPROVED,
             related_item_id=claim.item_id,
         )
+
+        # 2. Notify Security Desk staff (without plaintext OTP)
+        claimant = db.query(User).filter(User.id == claim.user_id).first()
+        claimant_name = claimant.name if claimant else "Student"
+        student_id_str = claimant.student_id if claimant and claimant.student_id else "No Student ID"
+        sec_msg = (
+            f"New collection request: '{item_title}' claimed by {claimant_name} ({student_id_str}). "
+            f"Verify the student's Collection OTP at the Main Security Desk."
+        )
+
+        security_users = db.query(User).filter(User.role == UserRole.SECURITY).all()
+        for sec_u in security_users:
+            create_notification(
+                db,
+                user_id=sec_u.id,
+                message=sec_msg,
+                notif_type=NotificationType.COLLECTION_PENDING,
+                related_item_id=claim.item_id,
+            )
 
     elif review_data.status == ClaimStatus.REJECTED:
         if item:
@@ -392,10 +414,15 @@ def verify_claim_otp(
     admin_user: User,
 ) -> Claim:
     """
-    Verifies the collection OTP presented by the claimant at the handover desk.
+    Verifies the collection OTP presented by the claimant at the Security Desk.
     Transitions the item status to RETURNED upon successful verification.
     """
-    claim = db.query(Claim).filter(Claim.id == claim_id).first()
+    claim = (
+        db.query(Claim)
+        .options(joinedload(Claim.item), joinedload(Claim.claimant))
+        .filter(Claim.id == claim_id)
+        .first()
+    )
     if not claim:
         raise ValueError("Claim not found.")
 
@@ -403,22 +430,32 @@ def verify_claim_otp(
         raise ValueError("This claim is not approved for collection.")
 
     if claim.is_otp_used:
-        raise ValueError("This collection OTP has already been verified and used.")
+        raise ValueError("This collection OTP has already been used.")
 
     if claim.otp_expires_at and datetime.utcnow() > claim.otp_expires_at:
-        raise ValueError("This collection OTP has expired. Please contact administration.")
+        raise ValueError("This collection OTP has expired. Please ask the student or administrator to regenerate an OTP.")
 
-    input_clean = otp_input.strip()
+    item = db.query(Item).filter(Item.id == claim.item_id).first()
+    if item and item.status == ItemStatus.RETURNED:
+        raise ValueError("Item has already been returned and collected.")
+
+    if not claim.otp_hash and not claim.otp_plain:
+        raise ValueError("No collection OTP exists for this claim.")
+
+    input_clean = (otp_input or "").strip()
     input_hash = hashlib.sha256(input_clean.encode()).hexdigest()
 
-    if input_hash != claim.otp_hash and input_clean != claim.otp_plain:
-        raise ValueError("Invalid collection OTP. Please double-check the 6-digit code shown on the claimant's screen.")
+    # Constant time comparison
+    matches_hash = secrets.compare_digest(input_hash, claim.otp_hash or "")
+    matches_plain = secrets.compare_digest(input_clean, claim.otp_plain or "")
+
+    if not matches_hash and not matches_plain:
+        raise ValueError("Invalid collection OTP. Please double-check the 6-digit code.")
 
     # Mark OTP as used
     claim.is_otp_used = True
 
     # Mark item as RETURNED and recovered
-    item = db.query(Item).filter(Item.id == claim.item_id).first()
     if item:
         item.status = ItemStatus.RETURNED
         item.recovered = True
@@ -429,37 +466,113 @@ def verify_claim_otp(
             days = (datetime.utcnow().date() - item.date_reported).days
             item.days_to_recovery = max(0, days)
 
-    # Record timeline transitions
-    admin_name = admin_user.name if admin_user else "Campus Admin"
-    record_timeline_event(
-        db,
-        item_id=claim.item_id,
-        status="COLLECTED",
-        actor_id=admin_user.id if admin_user else None,
-        actor_role="ADMIN",
-        actor_name=admin_name,
-        note=f"Collection OTP verified by {admin_name}. Item handed over to claimant.",
-    )
-    record_timeline_event(
-        db,
-        item_id=claim.item_id,
-        status="RETURNED",
-        actor_id=admin_user.id if admin_user else None,
-        actor_role="ADMIN",
-        actor_name=admin_name,
-        note="Item recovery lifecycle completed. Status updated to RETURNED.",
-    )
+    staff_name = admin_user.name if admin_user else "Main Security Desk"
+    staff_role = "ADMIN" if (admin_user and admin_user.role == UserRole.ADMIN) else "SECURITY"
+
+    # Record timeline transitions safely (prevent duplicates on repeat verification attempts)
+    existing_collected = db.query(ItemTimeline).filter(
+        ItemTimeline.item_id == claim.item_id,
+        ItemTimeline.status == "COLLECTED",
+    ).first()
+    if not existing_collected:
+        record_timeline_event(
+            db,
+            item_id=claim.item_id,
+            status="COLLECTED",
+            actor_id=admin_user.id if admin_user else None,
+            actor_role=staff_role,
+            actor_name=staff_name,
+            note=f"Item collected from Main Security Desk. Verified by {staff_name}.",
+        )
+
+    existing_returned = db.query(ItemTimeline).filter(
+        ItemTimeline.item_id == claim.item_id,
+        ItemTimeline.status == "RETURNED",
+    ).first()
+    if not existing_returned:
+        record_timeline_event(
+            db,
+            item_id=claim.item_id,
+            status="RETURNED",
+            actor_id=admin_user.id if admin_user else None,
+            actor_role=staff_role,
+            actor_name=staff_name,
+            note="Item recovery lifecycle completed. Status updated to RETURNED.",
+        )
 
     # Notify claimant
+    item_title = item.item_name if item else "item"
     create_notification(
         db,
         user_id=claim.user_id,
-        message=f"Item '{item.item_name if item else 'item'}' has been successfully handed over! Recovery completed.",
+        message=f"Item '{item_title}' has been successfully handed over at the Security Desk! Recovery completed.",
         notif_type=NotificationType.ITEM_RETURNED,
         related_item_id=claim.item_id,
     )
+
+    # Notify security staff confirmation
+    claimant_name = claim.claimant.name if claim.claimant else "Student"
+    if admin_user:
+        create_notification(
+            db,
+            user_id=admin_user.id,
+            message=f"Collection completed: '{item_title}' handed over to {claimant_name}.",
+            notif_type=NotificationType.ITEM_RETURNED,
+            related_item_id=claim.item_id,
+        )
 
     db.commit()
     db.refresh(claim)
     _enrich_claim_admin(db, claim)
     return claim
+
+
+def get_security_collections(
+    db: Session,
+    status_filter: Optional[str] = None,
+) -> list[dict]:
+    """
+    Fetches approved claims for the Security Desk dashboard.
+    Sanitized — never returns plaintext OTP or OTP hashes.
+    """
+    q = (
+        db.query(Claim)
+        .options(
+            joinedload(Claim.item),
+            joinedload(Claim.claimant),
+        )
+        .filter(Claim.status == ClaimStatus.APPROVED)
+    )
+
+    if status_filter == "PENDING":
+        q = q.filter(Claim.is_otp_used == False)
+    elif status_filter == "COMPLETED":
+        q = q.filter(Claim.is_otp_used == True)
+
+    claims = q.order_by(Claim.reviewed_at.desc(), Claim.created_at.desc()).all()
+
+    results = []
+    for c in claims:
+        item = c.item
+        claimant = c.claimant
+        col_status = "COMPLETED" if c.is_otp_used else "PENDING"
+        results.append({
+            "id": c.id,
+            "item_id": c.item_id,
+            "item_name": item.item_name if item else "Unknown Item",
+            "category": item.category if item else "General",
+            "location": item.location if item else "Unknown Location",
+            "item_image_url": item.image_url if item else None,
+            "claimant_id": c.user_id,
+            "claimant_name": claimant.name if claimant else "Student",
+            "student_id": claimant.student_id if claimant else None,
+            "claimant_email": claimant.email if claimant else "",
+            "approved_at": c.reviewed_at,
+            "collected_at": c.reviewed_at if c.is_otp_used else None,
+            "collection_status": col_status,
+            "is_otp_used": c.is_otp_used,
+            "status": c.status,
+            "admin_note": c.admin_note,
+            "created_at": c.created_at,
+        })
+    return results

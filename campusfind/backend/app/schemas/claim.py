@@ -73,3 +73,39 @@ class ClaimOutAdmin(ClaimOut):
     timeline: Optional[List[ItemTimelineOut]] = None
 
 
+class SecurityCollectionOut(BaseModel):
+    """Security Desk view of collection requests — sanitized, never exposes OTP secrets."""
+    id: UUID  # claim_id
+    item_id: UUID
+    item_name: str
+    category: str
+    location: str
+    item_image_url: Optional[str] = None
+    claimant_id: UUID
+    claimant_name: str
+    student_id: Optional[str] = None
+    claimant_email: str
+    approved_at: Optional[datetime] = None
+    collected_at: Optional[datetime] = None
+    collection_status: str  # "PENDING" or "COMPLETED"
+    is_otp_used: bool = False
+    status: ClaimStatus
+    admin_note: Optional[str] = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class SecurityVerificationResponse(BaseModel):
+    """Result of OTP verification at the Security Desk."""
+    success: bool
+    message: str
+    claim_id: UUID
+    item_id: UUID
+    item_name: str
+    claimant_name: str
+    student_id: Optional[str] = None
+    collected_at: datetime
+    status: str = "RETURNED"
+
+

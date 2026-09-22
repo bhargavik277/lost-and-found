@@ -171,13 +171,25 @@ export default function AdminClaims() {
                       <span className="text-base font-bold text-white">
                         {foundItem?.item_name || 'Found Item'}
                       </span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                        claim.status === 'PENDING' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
-                        claim.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
-                        'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                      }`}>
-                        {claim.status}
-                      </span>
+                      {claim.status === 'PENDING' ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> PENDING REVIEW
+                        </span>
+                      ) : claim.status === 'APPROVED' ? (
+                        claim.is_otp_used ? (
+                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> APPROVED • Collected & Returned
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                            <Check className="w-3 h-3 text-emerald-400" /> APPROVED • Collection: Pending at Main Security Desk
+                          </span>
+                        )
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                          <XCircle className="w-3 h-3" /> REJECTED
+                        </span>
+                      )}
                       {matchBadge && (
                         <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border flex items-center gap-1 ${matchBadge.bg}`}>
                           <Sparkles className="w-3 h-3" /> {matchScore}% Match ({matchBadge.text})

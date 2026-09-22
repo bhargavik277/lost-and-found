@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User, UserRole
 from app.models.item import Item
+from app.models.claim import Claim
 from app.schemas.claim import ClaimCreate, ClaimReview, ClaimOut, ClaimOutAdmin
 from app.services.auth_service import get_current_user
 from app.services.claim_service import (

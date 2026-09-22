@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 export default function Navbar() {
-  const { user, logout, isAdmin } = useAuth()
+  const { user, logout, isAdmin, isSecurity } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [unreadCount, setUnreadCount] = useState(0)
@@ -53,7 +53,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
-          <Link to={user ? (isAdmin ? '/admin' : '/dashboard') : '/'} className="flex items-center gap-3 group">
+          <Link to={user ? (isAdmin ? '/admin' : (isSecurity ? '/security' : '/dashboard')) : '/'} className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform">
               <Compass className="w-6 h-6 text-white" />
             </div>
@@ -70,7 +70,61 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           {user ? (
             <div className="hidden md:flex items-center gap-1">
-              {!isAdmin ? (
+              {isAdmin ? (
+                <>
+                  <Link 
+                    to="/admin" 
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                  >
+                    <Shield className="w-4 h-4 text-indigo-400" /> Admin Overview
+                  </Link>
+                  <Link 
+                    to="/admin/items" 
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin/items') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                  >
+                    <Layers className="w-4 h-4" /> Manage Items
+                  </Link>
+                  <Link 
+                    to="/admin/claims" 
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin/claims') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                  >
+                    <FileText className="w-4 h-4" /> Review Claims
+                  </Link>
+                  <Link 
+                    to="/security" 
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/security') ? 'bg-amber-600/20 text-amber-400 border border-amber-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                  >
+                    <Shield className="w-4 h-4 text-amber-400" /> Security Desk
+                  </Link>
+                  <Link 
+                    to="/admin/analytics" 
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin/analytics') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                  >
+                    <BarChart3 className="w-4 h-4 text-emerald-400" /> Analytics
+                  </Link>
+                  <Link 
+                    to="/admin/users" 
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin/users') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                  >
+                    <User className="w-4 h-4" /> Users
+                  </Link>
+                </>
+              ) : isSecurity ? (
+                <>
+                  <Link 
+                    to="/security" 
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/security') ? 'bg-amber-600/20 text-amber-400 border border-amber-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                  >
+                    <Shield className="w-4 h-4 text-amber-400" /> Security Desk Station
+                  </Link>
+                  <Link 
+                    to="/search" 
+                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/search') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
+                  >
+                    <Search className="w-4 h-4" /> Item Catalog
+                  </Link>
+                </>
+              ) : (
                 <>
                   <Link 
                     to="/dashboard" 
@@ -103,39 +157,6 @@ export default function Navbar() {
                     Claims
                   </Link>
                 </>
-              ) : (
-                <>
-                  <Link 
-                    to="/admin" 
-                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
-                  >
-                    <Shield className="w-4 h-4 text-indigo-400" /> Admin Overview
-                  </Link>
-                  <Link 
-                    to="/admin/items" 
-                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin/items') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
-                  >
-                    <Layers className="w-4 h-4" /> Manage Items
-                  </Link>
-                  <Link 
-                    to="/admin/claims" 
-                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin/claims') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
-                  >
-                    <FileText className="w-4 h-4" /> Review Claims
-                  </Link>
-                  <Link 
-                    to="/admin/analytics" 
-                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin/analytics') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
-                  >
-                    <BarChart3 className="w-4 h-4 text-emerald-400" /> Analytics
-                  </Link>
-                  <Link 
-                    to="/admin/users" 
-                    className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${isActive('/admin/users') ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800'}`}
-                  >
-                    <User className="w-4 h-4" /> Users
-                  </Link>
-                </>
               )}
             </div>
           ) : (
@@ -150,7 +171,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                {!isAdmin && (
+                {!isAdmin && !isSecurity && (
                   <div className="flex items-center gap-2">
                     <Link
                       to="/report-lost"
@@ -195,11 +216,16 @@ export default function Navbar() {
                       ADMIN
                     </span>
                   )}
+                  {isSecurity && (
+                    <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-semibold rounded">
+                      SECURITY
+                    </span>
+                  )}
                 </Link>
 
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-xl transition-colors"
+                  className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
                   title="Logout"
                 >
                   <LogOut className="w-4 h-4" />
@@ -237,7 +263,7 @@ export default function Navbar() {
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-400 hover:text-white"
+              className="p-2 text-slate-400 hover:text-white cursor-pointer"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -260,9 +286,44 @@ export default function Navbar() {
                     ADMIN
                   </span>
                 )}
+                {isSecurity && (
+                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-xs font-semibold rounded">
+                    SECURITY
+                  </span>
+                )}
               </div>
 
-              {!isAdmin ? (
+              {isAdmin ? (
+                <div className="space-y-1">
+                  <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
+                    Admin Overview
+                  </Link>
+                  <Link to="/admin/items" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
+                    Manage Items
+                  </Link>
+                  <Link to="/admin/claims" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
+                    Review Claims
+                  </Link>
+                  <Link to="/security" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-amber-400 hover:bg-slate-800">
+                    Security Desk
+                  </Link>
+                  <Link to="/admin/analytics" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
+                    Analytics
+                  </Link>
+                  <Link to="/admin/users" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
+                    Users
+                  </Link>
+                </div>
+              ) : isSecurity ? (
+                <div className="space-y-1">
+                  <Link to="/security" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-amber-400 hover:bg-slate-800 font-semibold">
+                    Security Desk Station
+                  </Link>
+                  <Link to="/search" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
+                    Browse Catalog
+                  </Link>
+                </div>
+              ) : (
                 <div className="space-y-1">
                   <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
                     Dashboard
@@ -287,24 +348,6 @@ export default function Navbar() {
                       Report Found
                     </Link>
                   </div>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
-                    Admin Overview
-                  </Link>
-                  <Link to="/admin/items" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
-                    Manage Items
-                  </Link>
-                  <Link to="/admin/claims" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
-                    Review Claims
-                  </Link>
-                  <Link to="/admin/analytics" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
-                    Analytics
-                  </Link>
-                  <Link to="/admin/users" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800">
-                    Users
-                  </Link>
                 </div>
               )}
 

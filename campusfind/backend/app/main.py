@@ -11,7 +11,7 @@ from app.services.init_db import init_database
 # Import all models so SQLAlchemy can create tables
 import app.models  # noqa: F401
 
-from app.routes import auth, items, matches, claims, notifications, admin
+from app.routes import auth, items, matches, claims, notifications, admin, security
 
 
 # Ensure upload directory exists before mounting StaticFiles
@@ -61,6 +61,7 @@ app.include_router(matches.router)
 app.include_router(claims.router)
 app.include_router(notifications.router)
 app.include_router(admin.router)
+app.include_router(security.router)
 
 
 @app.get("/")

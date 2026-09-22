@@ -62,6 +62,7 @@ export const claimsAPI = {
   submit: (data) => api.post('/claims', data),
   myClaims: () => api.get('/claims/my'),
   get: (id) => api.get(`/claims/${id}`),
+  getOtp: (id) => api.get(`/claims/${id}/otp`),
 }
 
 // ── Notifications ─────────────────────────────────────────────────────────────
@@ -81,7 +82,16 @@ export const adminAPI = {
   claims: (params) => api.get('/admin/claims', { params }),
   getClaim: (id) => api.get(`/admin/claims/${id}`),
   reviewClaim: (id, data) => api.patch(`/admin/claims/${id}/review`, data),
+  verifyOtp: (id, otp) => api.post(`/admin/claims/${id}/verify-otp`, { otp }),
   users: () => api.get('/admin/users'),
+}
+
+// ── Security Desk ─────────────────────────────────────────────────────────────
+export const securityAPI = {
+  collections: () => api.get('/security/collections'),
+  pendingCollections: () => api.get('/security/collections/pending'),
+  completedCollections: () => api.get('/security/collections/completed'),
+  verifyOtp: (claimId, otp) => api.post(`/security/collections/${claimId}/verify-otp`, { otp }),
 }
 
 
