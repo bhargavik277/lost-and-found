@@ -124,49 +124,33 @@ export default function AdminClaims() {
         <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
           <button
             onClick={() => setStatusFilter('ALL')}
-<<<<<<< HEAD
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${statusFilter === 'ALL' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
-=======
             className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
-              statusFilter === 'ALL' ? 'bg-brand-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              statusFilter === 'ALL' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           >
             All ({claims.length})
           </button>
           <button
             onClick={() => setStatusFilter('PENDING')}
-<<<<<<< HEAD
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${statusFilter === 'PENDING' ? 'bg-amber-600 text-white shadow-md shadow-amber-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
-=======
             className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
               statusFilter === 'PENDING' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           >
             Pending ({claims.filter(c => c.status === 'PENDING').length})
           </button>
           <button
             onClick={() => setStatusFilter('APPROVED')}
-<<<<<<< HEAD
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${statusFilter === 'APPROVED' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
-=======
             className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
               statusFilter === 'APPROVED' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           >
             Approved ({claims.filter(c => c.status === 'APPROVED').length})
           </button>
           <button
             onClick={() => setStatusFilter('REJECTED')}
-<<<<<<< HEAD
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${statusFilter === 'REJECTED' ? 'bg-rose-600 text-white shadow-md shadow-rose-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
-=======
             className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
               statusFilter === 'REJECTED' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           >
             Rejected ({claims.filter(c => c.status === 'REJECTED').length})
           </button>
@@ -188,13 +172,8 @@ export default function AdminClaims() {
             const matchBadge = matchScore !== null ? getMatchLabel(matchScore) : null
 
             return (
-<<<<<<< HEAD
-              <div key={claim.id} className={`card p-6 border-slate-700 space-y-4 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 reveal delay-${(idx % 8) + 1}`}>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-700/60">
-=======
-              <div key={claim.id} className="card p-6 border-slate-200/90 bg-white shadow-sm space-y-4 hover:border-brand-500/40 hover:shadow-md transition-all duration-200">
+              <div key={claim.id} className={`card p-6 border-slate-200/90 bg-white shadow-sm space-y-4 hover:border-indigo-300 hover:shadow-md transition-all duration-200 reveal delay-${(idx % 8) + 1}`}>
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-base font-bold text-slate-900">
@@ -237,11 +216,7 @@ export default function AdminClaims() {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => { setSelectedClaim(claim); setReviewNote(claim.admin_note || ''); }}
-<<<<<<< HEAD
-                      className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
-=======
-                      className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                     >
                       <FileText className="w-4 h-4" /> Review & Verify Claim
                     </button>
@@ -302,13 +277,8 @@ export default function AdminClaims() {
 
       {/* Comprehensive 5-Section Admin Review Modal */}
       {selectedClaim && (
-<<<<<<< HEAD
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-navy-950/85 backdrop-blur-md modal-overlay">
-          <div className="card w-full max-w-4xl bg-navy-900 border-slate-700 shadow-2xl relative max-h-[92vh] overflow-y-auto space-y-6 p-5 sm:p-8 modal-panel">
-=======
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in">
-          <div className="card w-full max-w-4xl bg-white border-slate-200 shadow-2xl relative max-h-[92vh] overflow-y-auto space-y-6 p-5 sm:p-8">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-md modal-overlay">
+          <div className="card w-full max-w-4xl bg-white border-slate-200 shadow-2xl relative max-h-[92vh] overflow-y-auto space-y-6 p-5 sm:p-8 modal-panel">
             {/* Close Button */}
             <button
               onClick={() => setSelectedClaim(null)}
@@ -792,11 +762,7 @@ export default function AdminClaims() {
                       key={idx}
                       type="button"
                       onClick={() => setReviewNote(preset)}
-<<<<<<< HEAD
-                      className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] border border-slate-700 transition-all hover:border-slate-600 hover:-translate-y-0.5 cursor-pointer text-left"
-=======
                       className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-[11px] border border-slate-200 shadow-xs transition-colors cursor-pointer text-left"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                     >
                       {preset.slice(0, 45)}...
                     </button>
@@ -814,11 +780,7 @@ export default function AdminClaims() {
                   value={reviewNote}
                   onChange={(e) => setReviewNote(e.target.value)}
                   placeholder="e.g. Serial numbers and description verified. Please bring your student ID to the Main Security Desk to pick up your item."
-<<<<<<< HEAD
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 leading-relaxed"
-=======
-                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 leading-relaxed shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 leading-relaxed shadow-xs"
                 />
               </div>
 
@@ -827,11 +789,7 @@ export default function AdminClaims() {
                 <button
                   type="button"
                   onClick={() => setSelectedClaim(null)}
-<<<<<<< HEAD
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer transition-all hover:scale-105 active:scale-95"
-=======
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                 >
                   Close
                 </button>
@@ -839,11 +797,7 @@ export default function AdminClaims() {
                   type="button"
                   disabled={processing}
                   onClick={() => handleReview('REJECTED')}
-<<<<<<< HEAD
-                  className="px-4 py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95"
-=======
                   className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                 >
                   <XCircle className="w-4 h-4" /> Reject Claim
                 </button>
@@ -851,11 +805,7 @@ export default function AdminClaims() {
                   type="button"
                   disabled={processing}
                   onClick={() => handleReview('APPROVED')}
-<<<<<<< HEAD
-                  className="btn-sheen px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95"
-=======
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+                  className="btn-sheen px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-4 h-4" /> Approve & Mark Returned
                 </button>

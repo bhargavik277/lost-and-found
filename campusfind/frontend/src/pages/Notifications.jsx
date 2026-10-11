@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { notificationsAPI } from '../services/api'
-import { Bell, CheckCheck, ArrowLeft, Sparkles, Shield, AlertCircle, ArrowRight } from 'lucide-react'
+import {
+  Bell,
+  CheckCheck,
+  ArrowLeft,
+  Sparkles,
+  ShieldCheck,
+  AlertCircle,
+  Info,
+  ArrowRight
+} from 'lucide-react'
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([])
@@ -10,7 +19,7 @@ export default function Notifications() {
   const fetchNotifs = async () => {
     setLoading(true)
     try {
-      const res = await notificationsAPI.list()
+      const res = await notificationsAPI.getAll()
       setNotifications(res.data || [])
     } catch {
       // ignore
@@ -25,8 +34,10 @@ export default function Notifications() {
 
   const markRead = async (id) => {
     try {
-      await notificationsAPI.markRead(id)
-      setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n))
+      await notificationsAPI.markAsRead(id)
+      setNotifications(prev =>
+        prev.map(n => (n.id === id ? { ...n, is_read: true } : n))
+      )
     } catch {
       // ignore
     }
@@ -34,8 +45,8 @@ export default function Notifications() {
 
   const markAllRead = async () => {
     try {
-      await notificationsAPI.markAllRead()
-      setNotifications(notifications.map(n => ({ ...n, is_read: true })))
+      await notificationsAPI.markAllAsRead()
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
     } catch {
       // ignore
     }
@@ -44,22 +55,21 @@ export default function Notifications() {
   const getTypeIcon = (type) => {
     switch (type) {
       case 'MATCH_FOUND':
-        return <Sparkles className="w-5 h-5 text-amber-600" />
-      case 'CLAIM_APPROVED':
-        return <Shield className="w-5 h-5 text-emerald-600" />
-      case 'CLAIM_REJECTED':
-        return <AlertCircle className="w-5 h-5 text-rose-600" />
+        return <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
       case 'CLAIM_SUBMITTED':
-        return <Shield className="w-5 h-5 text-indigo-600" />
+      case 'CLAIM_APPROVED':
+        return <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+      case 'CLAIM_REJECTED':
+        return <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
       default:
-        return <Bell className="w-5 h-5 text-indigo-600" />
+        return <Info className="w-5 h-5 text-indigo-600 shrink-0" />
     }
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in pb-16">
-      <Link 
-        to="/dashboard" 
+    <div className="space-y-6 animate-fade-in pb-16 max-w-4xl mx-auto">
+      <Link
+        to="/dashboard"
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Dashboard
@@ -74,11 +84,7 @@ export default function Notifications() {
         {notifications.some(n => !n.is_read) && (
           <button
             onClick={markAllRead}
-<<<<<<< HEAD
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-=======
-            className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+            className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
           >
             <CheckCheck className="w-4 h-4 text-emerald-600" /> Mark All as Read
           </button>
@@ -95,17 +101,10 @@ export default function Notifications() {
             <div
               key={notif.id}
               onClick={() => !notif.is_read && markRead(notif.id)}
-<<<<<<< HEAD
-              className={`p-4 rounded-2xl border transition-all duration-300 flex items-start gap-3.5 reveal delay-${(idx % 8) + 1} ${
-                notif.is_read
-                  ? 'bg-navy-800/60 border-slate-750 text-slate-400'
-                  : 'bg-indigo-950/20 border-indigo-500/30 text-white shadow-lg shadow-indigo-500/5 cursor-pointer hover:border-indigo-500/50 hover:-translate-y-0.5 hover:shadow-indigo-500/10'
-=======
-              className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex items-start gap-3.5 ${
+              className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex items-start gap-3.5 reveal delay-${(idx % 8) + 1} ${
                 notif.is_read
                   ? 'bg-white border-slate-200 text-slate-600 shadow-xs'
                   : 'bg-indigo-50/70 border-indigo-200 text-slate-900 shadow-xs cursor-pointer hover:border-indigo-300'
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
               }`}
             >
               <div className="p-2 rounded-xl bg-white border border-slate-200 shrink-0 mt-0.5 shadow-xs">
@@ -146,11 +145,7 @@ export default function Notifications() {
               </div>
 
               {!notif.is_read && (
-<<<<<<< HEAD
-                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-2 shrink-0 animate-pulse ring-4 ring-indigo-500/15"></div>
-=======
-                <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 mt-2 shrink-0 animate-pulse"></div>
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+                <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 mt-2 shrink-0 animate-pulse ring-4 ring-indigo-600/15"></div>
               )}
             </div>
           ))}

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { claimsAPI } from '../services/api'
-import { 
-  ShieldCheck, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
-  ArrowLeft, 
-  AlertCircle, 
-  FileText, 
-  Building2, 
-  KeyRound, 
-  RefreshCw 
+import {
+  ShieldCheck,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  ArrowLeft,
+  AlertCircle,
+  FileText,
+  Building2,
+  KeyRound,
+  RefreshCw
 } from 'lucide-react'
 
 export default function Claims() {
@@ -79,8 +79,8 @@ export default function Claims() {
 
   return (
     <div className="space-y-6 animate-fade-in pb-16">
-      <Link 
-        to="/dashboard" 
+      <Link
+        to="/dashboard"
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Dashboard
@@ -99,14 +99,21 @@ export default function Claims() {
         <div className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-2 animate-slide-down ${
           regenMsg.type === 'success'
             ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-            : 'bg-rose-50 border-rose-200 text-rose-800'
+            : 'bg-rose-50 border-rose-200 text-rose-700'
         }`}>
           <div className="flex items-center gap-2">
-            {regenMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" /> : <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />}
-            <span className="font-semibold">{regenMsg.text}</span>
+            {regenMsg.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span className="font-medium">{regenMsg.text}</span>
           </div>
-          <button onClick={() => setRegenMsg(null)} className="text-[11px] font-bold underline cursor-pointer hover:opacity-80">
-            Dismiss
+          <button
+            onClick={() => setRegenMsg(null)}
+            className="text-slate-400 hover:text-slate-600 text-xs font-bold"
+          >
+            ✕
           </button>
         </div>
       )}
@@ -121,13 +128,11 @@ export default function Claims() {
             const badge = statusBadges[claim.status] || statusBadges.PENDING
             const item = claim.item
             return (
-<<<<<<< HEAD
-              <div key={claim.id} className={`card p-6 border-slate-700 space-y-4 reveal delay-${(idx % 8) + 1} transition-all duration-300 hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/5`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-700/60">
-=======
-              <div key={claim.id} className="card bg-white border-slate-200/90 shadow-xs p-6 space-y-4">
+              <div
+                key={claim.id}
+                className={`card bg-white border-slate-200/90 shadow-xs p-6 space-y-4 reveal delay-${(idx % 8) + 1} transition-all duration-300 hover:border-indigo-300`}
+              >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                   <div>
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Claim for Found Item</span>
                     <h3 className="text-base font-bold text-slate-900">{item?.item_name || 'Item'}</h3>
@@ -160,13 +165,8 @@ export default function Claims() {
 
                 {claim.status === 'APPROVED' && (
                   !claim.is_otp_used ? (
-<<<<<<< HEAD
-                    <div className="p-4 bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl text-xs text-emerald-200 space-y-3 shadow-lg halo-pulse">
-                      <div className="flex items-center justify-between gap-2">
-=======
                     <div className="p-5 bg-gradient-to-br from-emerald-50/80 via-white to-amber-50/50 border border-emerald-200 rounded-2xl text-xs space-y-4 shadow-xs">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                         <div className="flex items-center gap-2">
                           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                           <span className="font-bold text-sm text-emerald-900">Claim Approved — Ready for Pickup!</span>
@@ -186,11 +186,7 @@ export default function Claims() {
                         <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center justify-center gap-1.5">
                           <KeyRound className="w-4 h-4 text-amber-600" /> Your Collection OTP
                         </div>
-<<<<<<< HEAD
-                        <div className="text-2xl font-mono font-bold tracking-[0.25em] text-amber-400 count-emphasis">
-=======
-                        <div className="text-3xl font-mono font-black tracking-[0.25em] text-slate-900 bg-amber-50 py-2 rounded-lg border border-amber-100 inline-block px-6">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+                        <div className="text-3xl font-mono font-black tracking-[0.25em] text-slate-900 bg-amber-50 py-2 rounded-lg border border-amber-100 inline-block px-6 count-emphasis">
                           {claim.otp_plain || 'Available at Desk'}
                         </div>
                         <div className="text-xs text-slate-600 font-medium">
@@ -228,11 +224,7 @@ export default function Claims() {
           <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
             When you locate a found item in Search or Match Radar, click "Claim This Item" to start the verification process.
           </p>
-<<<<<<< HEAD
-          <Link to="/search" className="inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all hover:scale-105 active:scale-95">
-=======
-          <Link to="/search" className="inline-block px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+          <Link to="/search" className="inline-block px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs active:scale-95">
             Browse Found Items
           </Link>
         </div>

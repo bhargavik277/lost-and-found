@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { adminAPI } from '../../services/api'
 import { ArrowLeft, Users, Shield, User, Mail, Hash } from 'lucide-react'
+import { useScrollReveal } from '../../hooks/useScrollReveal'
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
+
+  useScrollReveal([users, loading])
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -41,11 +44,7 @@ export default function AdminUsers() {
           <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
-<<<<<<< HEAD
-        <div className="card reveal p-0 overflow-hidden border-slate-700">
-=======
-        <div className="card p-0 overflow-hidden border-slate-200/90 bg-white shadow-sm">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+        <div className="card reveal p-0 overflow-hidden border-slate-200/90 bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
@@ -59,15 +58,11 @@ export default function AdminUsers() {
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-600">
                 {users.map((u) => (
-<<<<<<< HEAD
-                  <tr key={u.id} className="hover:bg-slate-850/50 hover:shadow-[inset_3px_0_0_0_rgba(99,102,241,0.5)] transition-all duration-200">
-=======
                   <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                     <td className="px-4 py-3 font-semibold">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        u.role === 'ADMIN' 
-                          ? 'bg-purple-50 text-purple-700 border border-purple-200' 
+                        u.role === 'ADMIN'
+                          ? 'bg-purple-50 text-purple-700 border border-purple-200'
                           : u.role === 'SECURITY'
                           ? 'bg-amber-50 text-amber-700 border border-amber-200'
                           : 'bg-indigo-50 text-indigo-700 border border-indigo-200'

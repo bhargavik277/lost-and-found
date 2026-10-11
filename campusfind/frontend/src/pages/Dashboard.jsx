@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
 import { itemsAPI, matchesAPI, claimsAPI, notificationsAPI } from '../services/api'
-import { 
-  PlusCircle, 
-  Search, 
-  Sparkles, 
-  Clock, 
-  ShieldCheck, 
-  Bell, 
-  ArrowRight, 
-  MapPin, 
-  Layers, 
-  CheckCircle2, 
+import {
+  PlusCircle,
+  Search,
+  Sparkles,
+  Clock,
+  ShieldCheck,
+  Bell,
+  ArrowRight,
+  MapPin,
+  Layers,
+  CheckCircle2,
   AlertCircle,
   Shield,
   HelpCircle
@@ -29,26 +29,25 @@ export default function Dashboard() {
   const [claims, setClaims] = useState([])
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState('')
   const [selectedClaimItem, setSelectedClaimItem] = useState(null)
 
   const fetchData = async () => {
     setLoading(true)
-    setError(null)
+    setError('')
     try {
       const [itemsRes, matchesRes, claimsRes, notifsRes] = await Promise.all([
         itemsAPI.myItems(),
-        matchesAPI.list(),
+        matchesAPI.getAll(),
         claimsAPI.myClaims(),
-        notificationsAPI.list(),
+        notificationsAPI.getAll(),
       ])
       setMyItems(itemsRes.data || [])
       setMatches(matchesRes.data || [])
       setClaims(claimsRes.data || [])
       setNotifications(notifsRes.data || [])
     } catch (err) {
-      console.error('Failed to load dashboard data:', err)
-      setError('Could not load some dashboard data. Please check your connection or refresh.')
+      setError('Could not refresh dashboard data. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -66,13 +65,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Welcome Banner */}
-<<<<<<< HEAD
-      <div className="card reveal bg-gradient-to-r from-navy-800 via-indigo-950/40 to-navy-800 border-slate-700/80 p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-=======
-      <div className="card bg-white border border-slate-200/90 shadow-sm p-7 sm:p-9 relative overflow-hidden">
+      <div className="card reveal bg-white border border-slate-200/90 shadow-sm p-7 sm:p-9 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-indigo-50 via-purple-50/50 to-transparent rounded-full blur-2xl pointer-events-none -mr-16 -mt-16"></div>
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold mb-3 border border-indigo-200/80 shadow-xs">
@@ -112,36 +106,20 @@ export default function Dashboard() {
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-<<<<<<< HEAD
-        <div className="card reveal delay-1 p-5 border-slate-700/60 bg-navy-800 interactive-lift">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">My Reports</span>
-            <div className="p-2 rounded-xl bg-indigo-600/20 text-indigo-400 transition-transform duration-300 group-hover:scale-110">
-=======
-        <div className="card p-5 border-slate-200/90 bg-white hover:border-indigo-200 transition-all shadow-xs">
+        <div className="card reveal delay-1 p-5 border-slate-200/90 bg-white hover:border-indigo-200 transition-all shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">My Reports</span>
             <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
               <Layers className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-<<<<<<< HEAD
-            <span className="text-2xl sm:text-3xl font-black text-white count-emphasis"><CountUp value={myItems.length} /></span>
-            <span className="text-xs text-slate-400 font-medium">({lostCount} lost, {foundCount} found)</span>
-          </div>
-        </div>
-
-        <div className="card reveal delay-2 p-5 border-slate-700/60 bg-navy-800 interactive-lift">
-=======
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900">{myItems.length}</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 count-emphasis"><CountUp value={myItems.length} /></span>
             <span className="text-xs text-slate-500 font-medium">({lostCount} lost, {foundCount} found)</span>
           </div>
         </div>
 
-        <div className="card p-5 border-slate-200/90 bg-white hover:border-amber-200 transition-all shadow-xs">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+        <div className="card reveal delay-2 p-5 border-slate-200/90 bg-white hover:border-amber-200 transition-all shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">AI Match Leads</span>
             <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
@@ -149,21 +127,12 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-<<<<<<< HEAD
-            <span className="text-2xl sm:text-3xl font-black text-amber-400 count-emphasis"><CountUp value={matches.length} /></span>
-            <span className="text-xs text-slate-400 font-medium">potential matches</span>
-          </div>
-        </div>
-
-        <div className="card reveal delay-3 p-5 border-slate-700/60 bg-navy-800 interactive-lift">
-=======
-            <span className="text-2xl sm:text-3xl font-extrabold text-amber-600">{matches.length}</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-amber-600 count-emphasis"><CountUp value={matches.length} /></span>
             <span className="text-xs text-slate-500 font-medium">potential leads</span>
           </div>
         </div>
 
-        <div className="card p-5 border-slate-200/90 bg-white hover:border-purple-200 transition-all shadow-xs">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+        <div className="card reveal delay-3 p-5 border-slate-200/90 bg-white hover:border-purple-200 transition-all shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Claims</span>
             <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
@@ -171,21 +140,12 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-<<<<<<< HEAD
-            <span className="text-2xl sm:text-3xl font-black text-purple-400 count-emphasis"><CountUp value={pendingClaims} /></span>
-            <span className="text-xs text-slate-400 font-medium">under review</span>
-          </div>
-        </div>
-
-        <div className="card reveal delay-4 p-5 border-slate-700/60 bg-navy-800 interactive-lift">
-=======
-            <span className="text-2xl sm:text-3xl font-extrabold text-purple-600">{pendingClaims}</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-purple-600 count-emphasis"><CountUp value={pendingClaims} /></span>
             <span className="text-xs text-slate-500 font-medium">under review</span>
           </div>
         </div>
 
-        <div className="card p-5 border-slate-200/90 bg-white hover:border-rose-200 transition-all shadow-xs">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+        <div className="card reveal delay-4 p-5 border-slate-200/90 bg-white hover:border-rose-200 transition-all shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Notifications</span>
             <div className="p-2 rounded-xl bg-rose-50 text-rose-600">
@@ -193,13 +153,8 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-<<<<<<< HEAD
-            <span className="text-2xl sm:text-3xl font-black text-rose-400 count-emphasis"><CountUp value={unreadNotifs} /></span>
-            <span className="text-xs text-slate-400 font-medium">unread alerts</span>
-=======
-            <span className="text-2xl sm:text-3xl font-extrabold text-rose-600">{unreadNotifs}</span>
+            <span className="text-2xl sm:text-3xl font-extrabold text-rose-600 count-emphasis"><CountUp value={unreadNotifs} /></span>
             <span className="text-xs text-slate-500 font-medium">unread alerts</span>
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           </div>
         </div>
       </div>

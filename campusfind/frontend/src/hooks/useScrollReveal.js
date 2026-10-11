@@ -68,7 +68,7 @@ function scan(scope) {
   }
 }
 
-export default function useScrollReveal() {
+export function useScrollReveal() {
   useLayoutEffect(() => {
     const reduced =
       typeof window.matchMedia === 'function' &&
@@ -102,3 +102,5 @@ export default function useScrollReveal() {
     }
   }, [])
 }
+
+export default useScrollReveal

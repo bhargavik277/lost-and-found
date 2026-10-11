@@ -2,22 +2,23 @@ import React, { useState, useEffect } from 'react'
 import { itemsAPI } from '../services/api'
 import ItemCard from '../components/ItemCard'
 import ClaimModal from '../components/ClaimModal'
-import { 
-  Search as SearchIcon, 
-  Filter, 
-  MapPin, 
-  Calendar, 
-  Tag, 
-  Sparkles, 
-  X,
+import {
+  Search as SearchIcon,
+  Filter,
   ChevronLeft,
   ChevronRight,
+  X,
+  Compass,
+  Sparkles,
+  MapPin,
+  Calendar,
+  Clock,
   ShieldCheck,
-  Clock
+  CheckCircle2
 } from 'lucide-react'
 
 const CATEGORIES = [
-  'All',
+  'All Categories',
   'Electronics',
   'Personal Items',
   'Study Materials',
@@ -30,30 +31,27 @@ const LOCATIONS = [
   'All Locations',
   'Library',
   'Computer Lab',
-  'Classroom',
-  'Laboratory',
-  'Auditorium',
-  'Canteen',
-  'Corridor',
-  'Parking',
-  'Playground',
-  'Sports Room',
+  'Cafeteria',
+  'Sports Complex',
+  'Main Auditorium',
+  'Science Block',
+  'Engineering Building',
+  'Student Center',
+  'Campus Grounds',
+  'Other',
 ]
 
 export default function Search() {
   const [items, setItems] = useState([])
   const [total, setTotal] = useState(0)
-  const [totalPages, setTotalPages] = useState(1)
-  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
-
-  // Filters
   const [query, setQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('All')
+  const [selectedCategory, setSelectedCategory] = useState('All Categories')
   const [selectedLocation, setSelectedLocation] = useState('All Locations')
   const [reportType, setReportType] = useState('ALL') // ALL, LOST, FOUND
-  const [status, setStatus] = useState('ALL') // ALL, ACTIVE, MATCHED, RETURNED
-
+  const [status, setStatus] = useState('ALL') // ALL, ACTIVE, MATCHED, CLAIMED, RETURNED
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(12)
   const [selectedClaimItem, setSelectedClaimItem] = useState(null)
   const [detailItem, setDetailItem] = useState(null)
 
@@ -62,10 +60,10 @@ export default function Search() {
     try {
       const params = {
         page,
-        page_size: 12,
+        page_size: pageSize,
       }
       if (query.trim()) params.query = query.trim()
-      if (selectedCategory !== 'All') params.category = selectedCategory
+      if (selectedCategory !== 'All Categories') params.category = selectedCategory
       if (selectedLocation !== 'All Locations') params.location = selectedLocation
       if (reportType !== 'ALL') params.report_type = reportType
       if (status !== 'ALL') params.status = status
@@ -73,7 +71,6 @@ export default function Search() {
       const res = await itemsAPI.list(params)
       setItems(res.data.items || [])
       setTotal(res.data.total || 0)
-      setTotalPages(res.data.total_pages || 1)
     } catch {
       // ignore
     } finally {
@@ -93,24 +90,22 @@ export default function Search() {
 
   const clearFilters = () => {
     setQuery('')
-    setSelectedCategory('All')
+    setSelectedCategory('All Categories')
     setSelectedLocation('All Locations')
     setReportType('ALL')
     setStatus('ALL')
     setPage(1)
   }
 
+  const totalPages = Math.ceil(total / pageSize) || 1
+
   return (
     <div className="space-y-6 animate-fade-in pb-16">
-      {/* Header Banner */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Campus Item Directory
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Search active lost and found reports across all campus departments, laboratories, and zones
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Public Item Catalog</h1>
+          <p className="text-xs text-slate-500 mt-1">Browse, search, and verify lost & found items across all campus zones</p>
         </div>
         <div className="text-xs font-semibold text-slate-500 bg-white px-3.5 py-1.5 rounded-xl border border-slate-200/80 shadow-xs w-fit">
           Showing <span className="text-indigo-600 font-bold">{items.length}</span> of <span className="text-slate-900 font-bold">{total}</span> items
@@ -118,11 +113,7 @@ export default function Search() {
       </div>
 
       {/* Filter Control Box */}
-<<<<<<< HEAD
-      <div className="card reveal delay-1 bg-navy-800 border-slate-700/80 p-5 space-y-4">
-=======
       <div className="card bg-white border-slate-200/90 shadow-sm p-5 space-y-4">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
         {/* Search Bar */}
         <form onSubmit={handleSearchSubmit} className="flex gap-2.5">
           <div className="relative flex-1">
@@ -132,11 +123,7 @@ export default function Search() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by keywords (e.g. laptop, wallet, calculator, blue bottle, library)..."
-<<<<<<< HEAD
-              className="w-full pl-10 pr-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
-=======
               className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
             />
             {query && (
               <button
@@ -150,11 +137,7 @@ export default function Search() {
           </div>
           <button
             type="submit"
-<<<<<<< HEAD
-            className="btn-sheen px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:scale-105 active:scale-95 cursor-pointer"
-=======
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs shadow-indigo-600/20 cursor-pointer active:scale-95"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+            className="btn-sheen px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs shadow-indigo-600/20 cursor-pointer active:scale-95"
           >
             Search
           </button>
@@ -168,11 +151,7 @@ export default function Search() {
             <select
               value={selectedCategory}
               onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
-<<<<<<< HEAD
-              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
-=======
               className="w-full p-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/15 cursor-pointer shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
             >
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -184,11 +163,7 @@ export default function Search() {
             <select
               value={selectedLocation}
               onChange={(e) => { setSelectedLocation(e.target.value); setPage(1); }}
-<<<<<<< HEAD
-              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
-=======
               className="w-full p-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/15 cursor-pointer shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
             >
               {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
@@ -200,11 +175,7 @@ export default function Search() {
             <select
               value={reportType}
               onChange={(e) => { setReportType(e.target.value); setPage(1); }}
-<<<<<<< HEAD
-              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
-=======
               className="w-full p-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/15 cursor-pointer shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
             >
               <option value="ALL">All Types</option>
               <option value="LOST">Lost Only</option>
@@ -218,11 +189,7 @@ export default function Search() {
             <select
               value={status}
               onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-<<<<<<< HEAD
-              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
-=======
               className="w-full p-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/15 cursor-pointer shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
             >
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active</option>
@@ -273,12 +240,8 @@ export default function Search() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-<<<<<<< HEAD
-            className="p-2 bg-slate-800 hover:bg-slate-700 hover:-translate-x-0.5 disabled:hover:translate-x-0 disabled:opacity-40 text-slate-300 rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed"
-=======
             className="p-2 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-40 text-slate-700 rounded-xl transition-colors shadow-xs cursor-pointer"
             aria-label="Previous page"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -288,12 +251,8 @@ export default function Search() {
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-<<<<<<< HEAD
-            className="p-2 bg-slate-800 hover:bg-slate-700 hover:translate-x-0.5 disabled:hover:translate-x-0 disabled:opacity-40 text-slate-300 rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed"
-=======
             className="p-2 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-40 text-slate-700 rounded-xl transition-colors shadow-xs cursor-pointer"
             aria-label="Next page"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -302,24 +261,19 @@ export default function Search() {
 
       {/* Item Details Modal */}
       {detailItem && (
-<<<<<<< HEAD
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/80 backdrop-blur-md modal-overlay">
-          <div className="card w-full max-w-md bg-navy-900 border-slate-700 shadow-2xl p-6 relative space-y-4 modal-panel">
-=======
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-          <div className="card w-full max-w-md bg-white border-slate-200 shadow-xl p-6 sm:p-7 relative space-y-4">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs modal-overlay">
+          <div className="card w-full max-w-md bg-white border-slate-200 shadow-xl p-6 sm:p-7 relative space-y-4 modal-panel">
             <button
               onClick={() => setDetailItem(null)}
-              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
               <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold ${
-                detailItem.report_type === 'LOST' 
-                  ? 'bg-rose-50 text-rose-700 border border-rose-200' 
+                detailItem.report_type === 'LOST'
+                  ? 'bg-rose-50 text-rose-700 border border-rose-200'
                   : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
               }`}>
                 {detailItem.report_type === 'LOST' ? '🔴 Lost Report' : '🟢 Found Item'}
@@ -327,7 +281,7 @@ export default function Search() {
               <span className="text-xs font-semibold text-slate-500">{detailItem.category}</span>
             </div>
             <h3 className="text-lg font-bold text-slate-900">{detailItem.item_name}</h3>
-            
+
             {detailItem.description && (
               <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed">
                 {detailItem.description}
@@ -363,14 +317,14 @@ export default function Search() {
                     setDetailItem(null)
                     setSelectedClaimItem(itemToClaim)
                   }}
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 inline mr-1" /> Claim This Item
                 </button>
               )}
               <button
                 onClick={() => setDetailItem(null)}
-                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
               >
                 Close
               </button>

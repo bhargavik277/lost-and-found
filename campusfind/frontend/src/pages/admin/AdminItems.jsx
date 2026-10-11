@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { adminAPI } from '../../services/api'
-import { 
-  Layers, 
-  ArrowLeft, 
-  Search, 
-  Filter, 
-  Edit, 
-  Check, 
-  X, 
-  Trash2, 
-  AlertTriangle, 
-  CheckCircle2, 
+import {
+  Layers,
+  ArrowLeft,
+  Search,
+  CheckCircle2,
+  Clock,
   AlertCircle,
-  MapPin,
-  Calendar,
-  Tag
+  Trash2,
+  Edit3,
+  Check,
+  X,
+  AlertTriangle
 } from 'lucide-react'
 
 export default function AdminItems() {
@@ -23,11 +20,8 @@ export default function AdminItems() {
   const [loading, setLoading] = useState(true)
   const [reportType, setReportType] = useState('')
   const [status, setStatus] = useState('')
-  const [page, setPage] = useState(1)
   const [editingItem, setEditingItem] = useState(null)
   const [newStatus, setNewStatus] = useState('')
-  
-  // Deletion states
   const [deletingItem, setDeletingItem] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -36,13 +30,13 @@ export default function AdminItems() {
   const fetchItems = async () => {
     setLoading(true)
     try {
-      const params = { page, page_size: 50 }
+      const params = {}
       if (reportType) params.report_type = reportType
       if (status) params.status = status
       const res = await adminAPI.items(params)
-      setItems(res.data || [])
-    } catch (err) {
-      setErrorMessage(err.response?.data?.detail || 'Failed to load inventory items.')
+      setItems(res.data.items || [])
+    } catch {
+      // ignore
     } finally {
       setLoading(false)
     }
@@ -50,48 +44,61 @@ export default function AdminItems() {
 
   useEffect(() => {
     fetchItems()
-  }, [page, reportType, status])
+  }, [reportType, status])
 
   const handleUpdateStatus = async (item) => {
-    if (!newStatus) return
     try {
-      await adminAPI.updateItem(item.id, { status: newStatus })
+      await adminAPI.updateItemStatus(item.id, newStatus)
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: newStatus } : i))
       setEditingItem(null)
-      fetchItems()
-    } catch (err) {
-      setErrorMessage(err.response?.data?.detail || 'Failed to update item status.')
+      setSuccessMessage(`Item "${item.item_name}" status updated to ${newStatus}`)
+      setTimeout(() => setSuccessMessage(''), 3000)
+    } catch {
+      setErrorMessage('Failed to update item status. Please try again.')
+      setTimeout(() => setErrorMessage(''), 3000)
     }
   }
 
   const handleDeleteItem = async () => {
     if (!deletingItem) return
     setDeleteLoading(true)
-    setErrorMessage('')
-
     try {
       await adminAPI.deleteItem(deletingItem.id)
-      setItems((prev) => prev.filter((i) => i.id !== deletingItem.id))
-      setSuccessMessage('Item deleted successfully.')
+      setItems(prev => prev.filter(i => i.id !== deletingItem.id))
+      setSuccessMessage(`Item "${deletingItem.item_name}" deleted permanently.`)
       setDeletingItem(null)
-      setTimeout(() => setSuccessMessage(''), 4000)
-    } catch (err) {
-      setErrorMessage(err.response?.data?.detail || 'Failed to delete item.')
+      setTimeout(() => setSuccessMessage(''), 3000)
+    } catch {
+      setErrorMessage('Failed to delete item. It may be linked to active claims.')
+      setTimeout(() => setErrorMessage(''), 3000)
     } finally {
       setDeleteLoading(false)
     }
   }
 
+  const statusColors = {
+    ACTIVE: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    MATCHED: 'bg-amber-50 text-amber-700 border-amber-200',
+    CLAIMED: 'bg-purple-50 text-purple-700 border-purple-200',
+    RETURNED: 'bg-blue-50 text-blue-700 border-blue-200',
+    CLOSED: 'bg-slate-100 text-slate-600 border-slate-200',
+  }
+
   return (
     <div className="space-y-6 animate-fade-in pb-16">
-      <Link to="/admin" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 transition-colors font-medium">
-        <ArrowLeft className="w-4 h-4" /> Back to Admin Overview
+      <Link
+        to="/admin"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
       </Link>
 
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Campus Item Inventory</h1>
-          <p className="text-xs text-slate-600 mt-1">
-            Browse, manage, update status, and permanently remove duplicate or incorrect reports across the database
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Database Inventory Control</h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Global management of all registered lost and found items in the campus repository
           </p>
         </div>
 
@@ -100,11 +107,7 @@ export default function AdminItems() {
           <select
             value={reportType}
             onChange={(e) => setReportType(e.target.value)}
-<<<<<<< HEAD
-            className="p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
-=======
-            className="p-2 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+            className="p-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/15 shadow-xs cursor-pointer"
           >
             <option value="">All Types</option>
             <option value="LOST">Lost</option>
@@ -114,11 +117,7 @@ export default function AdminItems() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-<<<<<<< HEAD
-            className="p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
-=======
-            className="p-2 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+            className="p-2 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/15 shadow-xs cursor-pointer"
           >
             <option value="">All Statuses</option>
             <option value="ACTIVE">Active</option>
@@ -132,11 +131,7 @@ export default function AdminItems() {
 
       {/* Feedback Alerts */}
       {successMessage && (
-<<<<<<< HEAD
-        <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between animate-slide-down">
-=======
         <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between animate-fade-in">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{successMessage}</span>
@@ -148,11 +143,7 @@ export default function AdminItems() {
       )}
 
       {errorMessage && (
-<<<<<<< HEAD
-        <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-xs text-rose-300 flex items-center justify-between animate-slide-down">
-=======
         <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center justify-between animate-fade-in">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{errorMessage}</span>
@@ -165,14 +156,10 @@ export default function AdminItems() {
 
       {loading ? (
         <div className="card py-16 flex justify-center bg-white border-slate-200/90 shadow-sm">
-          <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
-<<<<<<< HEAD
-        <div className="card reveal p-0 overflow-hidden border-slate-700">
-=======
         <div className="card p-0 overflow-hidden border-slate-200/90 bg-white shadow-sm">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200">
@@ -189,21 +176,19 @@ export default function AdminItems() {
               <tbody className="divide-y divide-slate-100 text-slate-600">
                 {items.length > 0 ? (
                   items.map((item) => (
-<<<<<<< HEAD
-                    <tr key={item.id} className="hover:bg-slate-850/50 hover:shadow-[inset_3px_0_0_0_rgba(99,102,241,0.5)] transition-all duration-200">
-=======
                     <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                       <td className="px-4 py-3 font-semibold">
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          item.report_type === 'LOST' 
-                            ? 'bg-rose-50 text-rose-700 border border-rose-200' 
+                          item.report_type === 'LOST'
+                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
                             : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         }`}>
                           {item.report_type}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-semibold text-slate-900 max-w-[180px] truncate">{item.item_name}</td>
+                      <td className="px-4 py-3 font-bold text-slate-900">
+                        {item.item_name}
+                      </td>
                       <td className="px-4 py-3">{item.category}</td>
                       <td className="px-4 py-3">{item.location}</td>
                       <td className="px-4 py-3">{item.date_reported}</td>
@@ -212,7 +197,7 @@ export default function AdminItems() {
                           <select
                             value={newStatus}
                             onChange={(e) => setNewStatus(e.target.value)}
-                            className="bg-white border border-brand-500 p-1 rounded text-slate-900 text-xs focus:ring-1 focus:ring-brand-500"
+                            className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-800 text-xs focus:outline-none focus:border-indigo-600 shadow-xs"
                           >
                             <option value="ACTIVE">ACTIVE</option>
                             <option value="MATCHED">MATCHED</option>
@@ -221,7 +206,7 @@ export default function AdminItems() {
                             <option value="CLOSED">CLOSED</option>
                           </select>
                         ) : (
-                          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-semibold">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${statusColors[item.status] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                             {item.status}
                           </span>
                         )}
@@ -232,22 +217,14 @@ export default function AdminItems() {
                             <>
                               <button
                                 onClick={() => handleUpdateStatus(item)}
-<<<<<<< HEAD
-                                className="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all hover:scale-110 active:scale-95"
-=======
                                 className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors cursor-pointer shadow-xs"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                                 title="Save Status"
                               >
                                 <Check className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => setEditingItem(null)}
-<<<<<<< HEAD
-                                className="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-all hover:scale-110 active:scale-95"
-=======
                                 className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                                 title="Cancel"
                               >
                                 <X className="w-3.5 h-3.5" />
@@ -256,11 +233,7 @@ export default function AdminItems() {
                           ) : (
                             <button
                               onClick={() => { setEditingItem(item); setNewStatus(item.status); }}
-<<<<<<< HEAD
-                              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] font-medium transition-all hover:scale-105 active:scale-95 cursor-pointer"
-=======
                               className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-medium transition-colors cursor-pointer"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                             >
                               Edit Status
                             </button>
@@ -269,11 +242,7 @@ export default function AdminItems() {
                           {/* Admin Only Delete Button */}
                           <button
                             onClick={() => setDeletingItem(item)}
-<<<<<<< HEAD
-                            className="p-1.5 bg-rose-600/10 hover:bg-rose-600/25 text-rose-400 hover:text-rose-300 border border-rose-500/20 hover:border-rose-500/40 rounded-lg transition-all hover:scale-110 active:scale-95 cursor-pointer"
-=======
                             className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 rounded-lg transition-colors cursor-pointer"
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
                             title="Delete Item Report"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -297,13 +266,8 @@ export default function AdminItems() {
 
       {/* Confirmation Modal */}
       {deletingItem && (
-<<<<<<< HEAD
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/85 backdrop-blur-md modal-overlay">
-          <div className="card w-full max-w-md bg-navy-900 border-slate-700 shadow-2xl p-6 relative space-y-5 modal-panel">
-=======
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="card w-full max-w-md bg-white border-slate-200 shadow-2xl p-6 relative space-y-5">
->>>>>>> 13ba826 (feat: complete premium SaaS frontend redesign)
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm modal-overlay">
+          <div className="card w-full max-w-md bg-white border-slate-200 shadow-2xl p-6 relative space-y-5 modal-panel">
             {/* Close */}
             <button
               onClick={() => setDeletingItem(null)}
@@ -337,8 +301,8 @@ export default function AdminItems() {
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Report Type:</span>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  deletingItem.report_type === 'LOST' 
-                    ? 'bg-rose-50 text-rose-700 border border-rose-200' 
+                  deletingItem.report_type === 'LOST'
+                    ? 'bg-rose-50 text-rose-700 border border-rose-200'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                 }`}>
                   {deletingItem.report_type}
