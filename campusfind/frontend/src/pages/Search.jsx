@@ -114,7 +114,7 @@ export default function Search() {
       </div>
 
       {/* Filter Control Box */}
-      <div className="card bg-navy-800 border-slate-700/80 p-5 space-y-4">
+      <div className="card reveal delay-1 bg-navy-800 border-slate-700/80 p-5 space-y-4">
         {/* Search Bar */}
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative flex-1">
@@ -124,12 +124,12 @@ export default function Search() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by keywords (e.g. laptop, wallet, calculator, blue bottle, library)..."
-              className="w-full pl-10 pr-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-10 pr-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
             />
           </div>
           <button
             type="submit"
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 cursor-pointer"
+            className="btn-sheen px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:scale-105 active:scale-95 cursor-pointer"
           >
             Search
           </button>
@@ -143,7 +143,7 @@ export default function Search() {
             <select
               value={selectedCategory}
               onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
-              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
             >
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -155,7 +155,7 @@ export default function Search() {
             <select
               value={selectedLocation}
               onChange={(e) => { setSelectedLocation(e.target.value); setPage(1); }}
-              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
             >
               {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
@@ -167,7 +167,7 @@ export default function Search() {
             <select
               value={reportType}
               onChange={(e) => { setReportType(e.target.value); setPage(1); }}
-              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
             >
               <option value="ALL">All Types</option>
               <option value="LOST">Lost Only</option>
@@ -181,7 +181,7 @@ export default function Search() {
             <select
               value={status}
               onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+              className="w-full p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
             >
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active</option>
@@ -200,13 +200,14 @@ export default function Search() {
         </div>
       ) : items.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {items.map((item) => (
-            <ItemCard
-              key={item.id}
-              item={item}
-              onClaim={(item) => setSelectedClaimItem(item)}
-              onViewDetail={(item) => setDetailItem(item)}
-            />
+          {items.map((item, idx) => (
+            <div key={item.id} className={`reveal delay-${(idx % 8) + 1}`}>
+              <ItemCard
+                item={item}
+                onClaim={(item) => setSelectedClaimItem(item)}
+                onViewDetail={(item) => setDetailItem(item)}
+              />
+            </div>
           ))}
         </div>
       ) : (
@@ -231,7 +232,7 @@ export default function Search() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="p-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 rounded-xl transition-colors"
+            className="p-2 bg-slate-800 hover:bg-slate-700 hover:-translate-x-0.5 disabled:hover:translate-x-0 disabled:opacity-40 text-slate-300 rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -241,7 +242,7 @@ export default function Search() {
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="p-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 rounded-xl transition-colors"
+            className="p-2 bg-slate-800 hover:bg-slate-700 hover:translate-x-0.5 disabled:hover:translate-x-0 disabled:opacity-40 text-slate-300 rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -250,8 +251,8 @@ export default function Search() {
 
       {/* Item Details Modal */}
       {detailItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/80 backdrop-blur-sm animate-fade-in">
-          <div className="card w-full max-w-md bg-navy-900 border-slate-700 shadow-2xl p-6 relative space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/80 backdrop-blur-md modal-overlay">
+          <div className="card w-full max-w-md bg-navy-900 border-slate-700 shadow-2xl p-6 relative space-y-4 modal-panel">
             <button
               onClick={() => setDetailItem(null)}
               className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white"

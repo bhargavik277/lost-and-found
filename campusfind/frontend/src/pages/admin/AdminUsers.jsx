@@ -41,7 +41,7 @@ export default function AdminUsers() {
           <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="card p-0 overflow-hidden border-slate-700">
+        <div className="card reveal p-0 overflow-hidden border-slate-700">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-850 text-slate-400 uppercase font-semibold border-b border-slate-700">
@@ -55,7 +55,7 @@ export default function AdminUsers() {
               </thead>
               <tbody className="divide-y divide-slate-800 text-slate-300">
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-850/50 transition-colors">
+                  <tr key={u.id} className="hover:bg-slate-850/50 hover:shadow-[inset_3px_0_0_0_rgba(99,102,241,0.5)] transition-all duration-200">
                     <td className="px-4 py-3 font-semibold">
                       <span className={`px-2 py-0.5 rounded text-[10px] ${u.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'}`}>
                         {u.role}

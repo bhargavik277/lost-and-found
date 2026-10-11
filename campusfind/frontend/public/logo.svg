@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="cfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="cfNeedleRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+    <linearGradient id="cfNeedleWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <filter id="cfGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#4f46e5" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Rounded Base Icon Container -->
+  <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#cfGrad)" filter="url(#cfGlow)"/>
+  <!-- Outer Compass Ring -->
+  <circle cx="24" cy="24" r="14" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+  <circle cx="24" cy="24" r="14" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-dasharray="2 4"/>
+  <!-- Cardinal Tick Marks -->
+  <line x1="24" y1="11" x2="24" y2="13" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="24" y1="35" x2="24" y2="37" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="11" y1="24" x2="13" y2="24" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="35" y1="24" x2="37" y2="24" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+  <!-- Compass Needle (North - Red) -->
+  <polygon points="24,13 27,24 24,22" fill="url(#cfNeedleRed)"/>
+  <!-- Compass Needle (South - White) -->
+  <polygon points="24,35 27,24 24,22" fill="url(#cfNeedleWhite)"/>
+  <!-- Compass Needle Other Halves for 3D depth -->
+  <polygon points="24,13 21,24 24,22" fill="#fb7185"/>
+  <polygon points="24,35 21,24 24,22" fill="#94a3b8"/>
+  <!-- Center Pivot -->
+  <circle cx="24" cy="24" r="2.5" fill="#ffffff"/>
+  <circle cx="24" cy="24" r="1" fill="#4f46e5"/>
+</svg>

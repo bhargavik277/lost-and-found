@@ -82,7 +82,7 @@ export default function Claims() {
       </div>
 
       {regenMsg && (
-        <div className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+        <div className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-2 animate-slide-down ${
           regenMsg.type === 'success'
             ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
             : 'bg-rose-950/40 border-rose-500/30 text-rose-300'
@@ -101,11 +101,11 @@ export default function Claims() {
         </div>
       ) : claims.length > 0 ? (
         <div className="space-y-4">
-          {claims.map((claim) => {
+          {claims.map((claim, idx) => {
             const badge = statusBadges[claim.status] || statusBadges.PENDING
             const item = claim.item
             return (
-              <div key={claim.id} className="card p-6 border-slate-700 space-y-4">
+              <div key={claim.id} className={`card p-6 border-slate-700 space-y-4 reveal delay-${(idx % 8) + 1} transition-all duration-300 hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/5`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-700/60">
                   <div>
                     <span className="text-xs text-slate-400">Claim for Found Item</span>
@@ -139,7 +139,7 @@ export default function Claims() {
 
                 {claim.status === 'APPROVED' && (
                   !claim.is_otp_used ? (
-                    <div className="p-4 bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl text-xs text-emerald-200 space-y-3 shadow-lg">
+                    <div className="p-4 bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/40 rounded-2xl text-xs text-emerald-200 space-y-3 shadow-lg halo-pulse">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
@@ -160,7 +160,7 @@ export default function Claims() {
                         <div className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold flex items-center justify-center gap-1">
                           <KeyRound className="w-3.5 h-3.5 text-amber-400" /> Your Collection OTP
                         </div>
-                        <div className="text-2xl font-mono font-bold tracking-[0.25em] text-amber-400">
+                        <div className="text-2xl font-mono font-bold tracking-[0.25em] text-amber-400 count-emphasis">
                           {claim.otp_plain || 'Available at Desk'}
                         </div>
                         <div className="text-[11px] text-slate-400">
@@ -198,7 +198,7 @@ export default function Claims() {
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
             When you locate a found item in Search or Match Radar, click "Claim This Item" to start the verification process.
           </p>
-          <Link to="/search" className="inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">
+          <Link to="/search" className="inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all hover:scale-105 active:scale-95">
             Browse Found Items
           </Link>
         </div>

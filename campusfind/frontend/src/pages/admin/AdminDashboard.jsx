@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { adminAPI } from '../../services/api'
+import CountUp from '../../components/CountUp'
 import { 
   Shield, 
   BarChart3, 
@@ -84,7 +85,7 @@ export default function AdminDashboard() {
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="card p-5 border-slate-700/60 bg-navy-800">
+        <div className="card reveal delay-1 p-5 border-slate-700/60 bg-navy-800 interactive-lift">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Total Items in DB</span>
             <div className="p-2 rounded-xl bg-indigo-600/20 text-indigo-400">
@@ -92,14 +93,14 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-black text-white">{kpis.total_items || 0}</span>
+            <span className="text-2xl sm:text-3xl font-black text-white count-emphasis"><CountUp value={kpis.total_items || 0} /></span>
             <div className="text-[11px] text-slate-400 mt-1">
               {kpis.total_lost || 0} Lost • {kpis.total_found || 0} Found
             </div>
           </div>
         </div>
 
-        <div className="card p-5 border-slate-700/60 bg-navy-800">
+        <div className="card reveal delay-2 p-5 border-slate-700/60 bg-navy-800 interactive-lift">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Items Returned</span>
             <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
@@ -107,14 +108,14 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-black text-emerald-400">{kpis.total_returned || 0}</span>
+            <span className="text-2xl sm:text-3xl font-black text-emerald-400 count-emphasis"><CountUp value={kpis.total_returned || 0} /></span>
             <div className="text-[11px] text-emerald-400/80 mt-1">
               {kpis.recovery_rate || 0}% recovery rate
             </div>
           </div>
         </div>
 
-        <div className="card p-5 border-slate-700/60 bg-navy-800">
+        <div className="card reveal delay-3 p-5 border-slate-700/60 bg-navy-800 interactive-lift">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Avg. Recovery Time</span>
             <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
@@ -122,14 +123,14 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-black text-purple-400">
+            <span className="text-2xl sm:text-3xl font-black text-purple-400 count-emphasis">
               {kpis.avg_days_to_recovery || 0} <span className="text-sm font-normal text-slate-400">days</span>
             </span>
             <div className="text-[11px] text-slate-400 mt-1">from reported to handover</div>
           </div>
         </div>
 
-        <div className="card p-5 border-slate-700/60 bg-navy-800">
+        <div className="card reveal delay-4 p-5 border-slate-700/60 bg-navy-800 interactive-lift">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Pending Claims</span>
             <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
@@ -137,7 +138,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-black text-amber-400">{kpis.pending_claims || 0}</span>
+            <span className="text-2xl sm:text-3xl font-black text-amber-400 count-emphasis"><CountUp value={kpis.pending_claims || 0} /></span>
             <div className="text-[11px] text-slate-400 mt-1">awaiting review</div>
           </div>
         </div>
@@ -200,7 +201,7 @@ export default function AdminDashboard() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {data.hotspots.map((h, i) => (
-              <div key={i} className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 text-xs space-y-1">
+              <div key={i} className={`p-3.5 bg-slate-850 rounded-xl border border-slate-750 text-xs space-y-1 reveal delay-${(i % 5) + 1} transition-all duration-300 hover:border-indigo-500/30 hover:-translate-y-0.5`}>
                 <div className="text-slate-400 font-medium">#{i + 1} {h.location}</div>
                 <div className="text-base font-bold text-white">{h.count} lost reports</div>
                 <div className="text-[11px] text-indigo-400">Top: {h.top_category}</div>

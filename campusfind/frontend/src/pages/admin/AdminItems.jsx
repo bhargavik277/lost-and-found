@@ -100,7 +100,7 @@ export default function AdminItems() {
           <select
             value={reportType}
             onChange={(e) => setReportType(e.target.value)}
-            className="p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+            className="p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
           >
             <option value="">All Types</option>
             <option value="LOST">Lost</option>
@@ -110,7 +110,7 @@ export default function AdminItems() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+            className="p-2 bg-slate-850 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer hover:border-slate-600"
           >
             <option value="">All Statuses</option>
             <option value="ACTIVE">Active</option>
@@ -124,7 +124,7 @@ export default function AdminItems() {
 
       {/* Feedback Alerts */}
       {successMessage && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between animate-fade-in">
+        <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between animate-slide-down">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{successMessage}</span>
@@ -136,7 +136,7 @@ export default function AdminItems() {
       )}
 
       {errorMessage && (
-        <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-xs text-rose-300 flex items-center justify-between animate-fade-in">
+        <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-xs text-rose-300 flex items-center justify-between animate-slide-down">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
             <span>{errorMessage}</span>
@@ -152,7 +152,7 @@ export default function AdminItems() {
           <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="card p-0 overflow-hidden border-slate-700">
+        <div className="card reveal p-0 overflow-hidden border-slate-700">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-850 text-slate-400 uppercase font-semibold border-b border-slate-700">
@@ -169,7 +169,7 @@ export default function AdminItems() {
               <tbody className="divide-y divide-slate-800 text-slate-300">
                 {items.length > 0 ? (
                   items.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-850/50 transition-colors">
+                    <tr key={item.id} className="hover:bg-slate-850/50 hover:shadow-[inset_3px_0_0_0_rgba(99,102,241,0.5)] transition-all duration-200">
                       <td className="px-4 py-3 font-semibold">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.report_type === 'LOST' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}`}>
                           {item.report_type}
@@ -204,14 +204,14 @@ export default function AdminItems() {
                             <>
                               <button
                                 onClick={() => handleUpdateStatus(item)}
-                                className="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors"
+                                className="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all hover:scale-110 active:scale-95"
                                 title="Save Status"
                               >
                                 <Check className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => setEditingItem(null)}
-                                className="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors"
+                                className="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-all hover:scale-110 active:scale-95"
                                 title="Cancel"
                               >
                                 <X className="w-3.5 h-3.5" />
@@ -220,7 +220,7 @@ export default function AdminItems() {
                           ) : (
                             <button
                               onClick={() => { setEditingItem(item); setNewStatus(item.status); }}
-                              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] font-medium transition-colors"
+                              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[11px] font-medium transition-all hover:scale-105 active:scale-95 cursor-pointer"
                             >
                               Edit Status
                             </button>
@@ -229,7 +229,7 @@ export default function AdminItems() {
                           {/* Admin Only Delete Button */}
                           <button
                             onClick={() => setDeletingItem(item)}
-                            className="p-1.5 bg-rose-600/10 hover:bg-rose-600/25 text-rose-400 hover:text-rose-300 border border-rose-500/20 hover:border-rose-500/40 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 bg-rose-600/10 hover:bg-rose-600/25 text-rose-400 hover:text-rose-300 border border-rose-500/20 hover:border-rose-500/40 rounded-lg transition-all hover:scale-110 active:scale-95 cursor-pointer"
                             title="Delete Item Report"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -253,8 +253,8 @@ export default function AdminItems() {
 
       {/* Confirmation Modal */}
       {deletingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/85 backdrop-blur-sm animate-fade-in">
-          <div className="card w-full max-w-md bg-navy-900 border-slate-700 shadow-2xl p-6 relative space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/85 backdrop-blur-md modal-overlay">
+          <div className="card w-full max-w-md bg-navy-900 border-slate-700 shadow-2xl p-6 relative space-y-5 modal-panel">
             {/* Close */}
             <button
               onClick={() => setDeletingItem(null)}

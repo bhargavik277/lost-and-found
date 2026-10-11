@@ -182,10 +182,10 @@ export default function SecurityDashboard() {
         {/* Pending Collections */}
         <div 
           onClick={() => setActiveTab('pending')}
-          className={`card p-5 border transition-all cursor-pointer ${
+          className={`card p-5 border transition-all cursor-pointer reveal delay-1 ${
             activeTab === 'pending'
               ? 'bg-amber-950/20 border-amber-500/50 shadow-lg shadow-amber-500/10'
-              : 'bg-navy-800/80 border-slate-700 hover:border-slate-600'
+              : 'bg-navy-800/80 border-slate-700 hover:border-slate-600 hover:-translate-y-0.5'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -194,7 +194,7 @@ export default function SecurityDashboard() {
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{pending.length}</div>
+          <div className="text-2xl font-bold text-white mt-2 count-emphasis">{pending.length}</div>
           <div className="text-[11px] text-amber-400 mt-1 font-medium flex items-center gap-1">
             <KeyRound className="w-3 h-3" /> Waiting for student OTP verification
           </div>
@@ -203,10 +203,10 @@ export default function SecurityDashboard() {
         {/* Completed Collections */}
         <div 
           onClick={() => setActiveTab('completed')}
-          className={`card p-5 border transition-all cursor-pointer ${
+          className={`card p-5 border transition-all cursor-pointer reveal delay-2 ${
             activeTab === 'completed'
               ? 'bg-emerald-950/20 border-emerald-500/50 shadow-lg shadow-emerald-500/10'
-              : 'bg-navy-800/80 border-slate-700 hover:border-slate-600'
+              : 'bg-navy-800/80 border-slate-700 hover:border-slate-600 hover:-translate-y-0.5'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -215,7 +215,7 @@ export default function SecurityDashboard() {
               <PackageCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-white mt-2">{completed.length}</div>
+          <div className="text-2xl font-bold text-white mt-2 count-emphasis">{completed.length}</div>
           <div className="text-[11px] text-emerald-400 mt-1 font-medium flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3" /> Successfully collected items
           </div>
@@ -224,10 +224,10 @@ export default function SecurityDashboard() {
         {/* Security Alerts */}
         <div 
           onClick={() => setActiveTab('notifications')}
-          className={`card p-5 border transition-all cursor-pointer ${
+          className={`card p-5 border transition-all cursor-pointer reveal delay-3 ${
             activeTab === 'notifications'
               ? 'bg-indigo-950/20 border-indigo-500/50 shadow-lg shadow-indigo-500/10'
-              : 'bg-navy-800/80 border-slate-700 hover:border-slate-600'
+              : 'bg-navy-800/80 border-slate-700 hover:border-slate-600 hover:-translate-y-0.5'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -290,7 +290,7 @@ export default function SecurityDashboard() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search student, item, location..."
-            className="w-full pl-9 pr-3.5 py-2 bg-slate-850 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            className="w-full pl-9 pr-3.5 py-2 bg-slate-850 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all duration-200"
           />
         </div>
       </div>
@@ -305,10 +305,10 @@ export default function SecurityDashboard() {
         /* ── PENDING COLLECTIONS ── */
         filteredPending.length > 0 ? (
           <div className="space-y-4">
-            {filteredPending.map((c) => (
+            {filteredPending.map((c, idx) => (
               <div
                 key={c.id}
-                className="card p-5 sm:p-6 bg-navy-800/90 border-slate-700 hover:border-amber-500/50 transition-all duration-200 space-y-4 shadow-xl"
+                className={`card p-5 sm:p-6 bg-navy-800/90 border-slate-700 hover:border-amber-500/50 transition-all duration-300 space-y-4 shadow-xl reveal delay-${(idx % 8) + 1}`}
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-700/60">
                   <div className="space-y-1">
@@ -338,7 +338,7 @@ export default function SecurityDashboard() {
                   {/* Primary Handover Action */}
                   <button
                     onClick={() => openVerifyModal(c)}
-                    className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                    className="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 hover:scale-105 active:scale-95"
                   >
                     <KeyRound className="w-4 h-4" />
                     <span>Verify OTP & Complete Collection</span>
@@ -480,8 +480,8 @@ export default function SecurityDashboard() {
 
       {/* ── OTP VERIFICATION MODAL ── */}
       {selectedClaim && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/85 backdrop-blur-md animate-fade-in">
-          <div className="card w-full max-w-lg bg-navy-900 border-slate-700 shadow-2xl relative p-6 sm:p-8 space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/85 backdrop-blur-md modal-overlay">
+          <div className="card w-full max-w-lg bg-navy-900 border-slate-700 shadow-2xl relative p-6 sm:p-8 space-y-6 modal-panel">
             {/* Close Button */}
             <button
               onClick={() => setSelectedClaim(null)}
@@ -521,7 +521,7 @@ export default function SecurityDashboard() {
 
             {/* Error Message */}
             {verifyError && (
-              <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-start gap-2 text-xs text-rose-300 animate-fade-in">
+              <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-start gap-2 text-xs text-rose-300 animate-slide-down">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
                 <div className="space-y-0.5">
                   <div className="font-bold">Verification Failed</div>
@@ -532,8 +532,8 @@ export default function SecurityDashboard() {
 
             {/* Success View */}
             {verifyResult ? (
-              <div className="p-5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center space-y-3 animate-fade-in">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+              <div className="p-5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center space-y-3 modal-panel">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto animate-scale-up halo-pulse">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
@@ -568,7 +568,7 @@ export default function SecurityDashboard() {
                     value={otpInput}
                     onChange={(e) => setOtpInput(e.target.value.replace(/\s+/g, ''))}
                     placeholder="220506"
-                    className="w-full py-3 bg-slate-850 border border-slate-700 rounded-xl text-center text-xl tracking-[0.3em] font-mono font-bold text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                    className="w-full py-3 bg-slate-850 border border-slate-700 rounded-xl text-center text-xl tracking-[0.3em] font-mono font-bold text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-500/20 focus:scale-[1.02] transition-all duration-200"
                   />
                   <p className="text-[11px] text-slate-400 text-center mt-1.5">
                     Ask the student to show the 6-digit code on their CampusFind claims screen
@@ -579,14 +579,14 @@ export default function SecurityDashboard() {
                   <button
                     type="button"
                     onClick={() => setSelectedClaim(null)}
-                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-750 text-slate-300 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
+                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-750 text-slate-300 font-semibold rounded-xl text-xs transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={verifying || !otpInput.trim()}
-                    className="flex-1 py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="btn-sheen flex-1 py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95 disabled:hover:scale-100"
                   >
                     {verifying ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

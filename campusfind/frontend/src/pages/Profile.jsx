@@ -14,10 +14,10 @@ export default function Profile() {
 
   return (
     <div className="max-w-xl mx-auto py-8 animate-fade-in pb-16">
-      <div className="card bg-navy-800 border-slate-700 shadow-2xl p-8 space-y-6">
+      <div className="card reveal bg-navy-800 border-slate-700 shadow-2xl p-8 space-y-6">
         {/* User Avatar & Header */}
         <div className="flex items-center gap-4 pb-6 border-b border-slate-700">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-600/30 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/10">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-600/30 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/10 animate-scale-up">
             {user?.name?.[0]?.toUpperCase() || 'U'}
           </div>
           <div>
@@ -33,14 +33,14 @@ export default function Profile() {
 
         {/* Profile Info Details */}
         <div className="space-y-3 text-xs">
-          <div className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 flex items-center justify-between">
+          <div className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 flex items-center justify-between transition-all duration-300 hover:border-indigo-500/30 hover:bg-slate-850/80">
             <span className="text-slate-400 flex items-center gap-2">
               <User className="w-4 h-4 text-indigo-400" /> Account Name
             </span>
             <span className="text-white font-semibold">{user?.name}</span>
           </div>
 
-          <div className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 flex items-center justify-between">
+          <div className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 flex items-center justify-between transition-all duration-300 hover:border-indigo-500/30 hover:bg-slate-850/80">
             <span className="text-slate-400 flex items-center gap-2">
               <Mail className="w-4 h-4 text-indigo-400" /> Campus Email
             </span>
@@ -48,7 +48,7 @@ export default function Profile() {
           </div>
 
           {user?.student_id && (
-            <div className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 flex items-center justify-between">
+            <div className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 flex items-center justify-between transition-all duration-300 hover:border-indigo-500/30 hover:bg-slate-850/80">
               <span className="text-slate-400 flex items-center gap-2">
                 <Hash className="w-4 h-4 text-indigo-400" /> Student ID
               </span>
@@ -56,7 +56,7 @@ export default function Profile() {
             </div>
           )}
 
-          <div className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 flex items-center justify-between">
+          <div className="p-3.5 bg-slate-850 rounded-xl border border-slate-750 flex items-center justify-between transition-all duration-300 hover:border-indigo-500/30 hover:bg-slate-850/80">
             <span className="text-slate-400 flex items-center gap-2">
               <Shield className="w-4 h-4 text-indigo-400" /> Account Role
             </span>
@@ -67,7 +67,7 @@ export default function Profile() {
         <div className="pt-4 border-t border-slate-700 flex justify-end">
           <button
             onClick={handleLogout}
-            className="px-5 py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 hover:border-rose-500/50 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
           >
             <LogOut className="w-4 h-4" /> Sign Out of Account
           </button>
