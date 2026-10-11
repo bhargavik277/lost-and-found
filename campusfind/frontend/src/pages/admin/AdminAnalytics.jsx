@@ -97,29 +97,29 @@ export default function AdminAnalytics() {
 
       {/* KPI Highlight Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="card p-5 bg-navy-800 border-slate-700">
+        <div className="card reveal delay-1 p-5 bg-navy-800 border-slate-700 interactive-lift">
           <span className="text-xs font-semibold text-slate-400">Total Reports</span>
-          <div className="text-2xl sm:text-3xl font-black text-white mt-2">{kpis.total_items}</div>
+          <div className="text-2xl sm:text-3xl font-black text-white mt-2 count-emphasis">{kpis.total_items}</div>
           <span className="text-[11px] text-slate-400 mt-1 block">{kpis.total_lost} Lost • {kpis.total_found} Found</span>
         </div>
 
-        <div className="card p-5 bg-navy-800 border-slate-700">
+        <div className="card reveal delay-2 p-5 bg-navy-800 border-slate-700 interactive-lift">
           <span className="text-xs font-semibold text-slate-400">Recovery Rate</span>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-400 mt-2">{kpis.recovery_rate}%</div>
+          <div className="text-2xl sm:text-3xl font-black text-emerald-400 mt-2 count-emphasis">{kpis.recovery_rate}%</div>
           <span className="text-[11px] text-emerald-400/80 mt-1 block">{kpis.total_returned} items returned</span>
         </div>
 
-        <div className="card p-5 bg-navy-800 border-slate-700">
+        <div className="card reveal delay-3 p-5 bg-navy-800 border-slate-700 interactive-lift">
           <span className="text-xs font-semibold text-slate-400">Avg. Days to Recovery</span>
-          <div className="text-2xl sm:text-3xl font-black text-purple-400 mt-2">
+          <div className="text-2xl sm:text-3xl font-black text-purple-400 mt-2 count-emphasis">
             {kpis.avg_days_to_recovery} <span className="text-sm font-normal text-slate-400">days</span>
           </div>
           <span className="text-[11px] text-slate-400 mt-1 block">for recovered property</span>
         </div>
 
-        <div className="card p-5 bg-navy-800 border-slate-700">
+        <div className="card reveal delay-4 p-5 bg-navy-800 border-slate-700 interactive-lift">
           <span className="text-xs font-semibold text-slate-400">Pending Actions</span>
-          <div className="text-2xl sm:text-3xl font-black text-amber-400 mt-2">{kpis.pending_claims}</div>
+          <div className="text-2xl sm:text-3xl font-black text-amber-400 mt-2 count-emphasis">{kpis.pending_claims}</div>
           <span className="text-[11px] text-slate-400 mt-1 block">claims under review</span>
         </div>
       </div>
@@ -127,7 +127,7 @@ export default function AdminAnalytics() {
       {/* Row 1: Items by Category & Items by Location */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 1. Items by Category */}
-        <div className="card p-6 border-slate-700 space-y-4">
+        <div className="card reveal delay-1 p-6 border-slate-700 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Layers className="w-4 h-4 text-indigo-400" /> 1. Items by Category
@@ -150,7 +150,7 @@ export default function AdminAnalytics() {
         </div>
 
         {/* 2. Items by Location */}
-        <div className="card p-6 border-slate-700 space-y-4">
+        <div className="card reveal delay-2 p-6 border-slate-700 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-400" /> 2. Items by Location
@@ -176,7 +176,7 @@ export default function AdminAnalytics() {
       {/* Row 2: Lost vs Found vs Returned & Recovery Time Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 3. Lost vs Found vs Returned */}
-        <div className="card p-6 border-slate-700 space-y-4">
+        <div className="card reveal delay-1 p-6 border-slate-700 space-y-4">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
             <PieIcon className="w-4 h-4 text-purple-400" /> 3. Lost vs Found vs Returned Breakdown
           </h3>
@@ -204,7 +204,7 @@ export default function AdminAnalytics() {
         </div>
 
         {/* 4 & 5. Days to Recovery Distribution */}
-        <div className="card p-6 border-slate-700 space-y-4">
+        <div className="card reveal delay-2 p-6 border-slate-700 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-400" /> 4 & 5. Days to Recovery Distribution
@@ -228,7 +228,7 @@ export default function AdminAnalytics() {
       </div>
 
       {/* Row 3: 9. Lost Item Hotspots */}
-      <div className="card p-6 border-slate-700 space-y-4">
+      <div className="card reveal p-6 border-slate-700 space-y-4">
         <h3 className="text-base font-bold text-white flex items-center gap-2">
           <MapPin className="w-4 h-4 text-rose-400" /> 9. Lost Item Campus Hotspots
         </h3>
@@ -238,7 +238,7 @@ export default function AdminAnalytics() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
           {hotspots.map((spot, idx) => (
-            <div key={idx} className="p-4 rounded-2xl bg-slate-850 border border-slate-750 space-y-2 relative overflow-hidden">
+            <div key={idx} className={`p-4 rounded-2xl bg-slate-850 border border-slate-750 space-y-2 relative overflow-hidden reveal delay-${(idx % 5) + 1} transition-all duration-300 hover:-translate-y-1 hover:border-rose-500/40`}>
               <div className="w-2 h-full bg-rose-500 absolute left-0 top-0"></div>
               <div className="pl-1">
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Rank #{idx + 1}</span>
@@ -254,7 +254,7 @@ export default function AdminAnalytics() {
       {/* Row 4: Survey Insights (6. Search Methods, 7. Main Difficulties, 8. Preferred Features) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 6. Search Methods Used */}
-        <div className="card p-6 border-slate-700 space-y-4">
+        <div className="card reveal delay-1 p-6 border-slate-700 space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Search className="w-4 h-4 text-indigo-400" /> 6. Search Methods Used
           </h3>
@@ -267,7 +267,7 @@ export default function AdminAnalytics() {
                 </div>
                 <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                   <div
-                    className="bg-indigo-500 h-full rounded-full"
+                    className="bg-indigo-500 h-full rounded-full bar-grow"
                     style={{ width: `${(item.count / kpis.total_lost) * 100}%` }}
                   ></div>
                 </div>
@@ -277,7 +277,7 @@ export default function AdminAnalytics() {
         </div>
 
         {/* 7. Main Difficulties Experienced */}
-        <div className="card p-6 border-slate-700 space-y-4">
+        <div className="card reveal delay-2 p-6 border-slate-700 space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-rose-400" /> 7. Main Difficulties
           </h3>
@@ -290,7 +290,7 @@ export default function AdminAnalytics() {
                 </div>
                 <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                   <div
-                    className="bg-rose-500 h-full rounded-full"
+                    className="bg-rose-500 h-full rounded-full bar-grow"
                     style={{ width: `${(item.count / kpis.total_lost) * 100}%` }}
                   ></div>
                 </div>
@@ -300,7 +300,7 @@ export default function AdminAnalytics() {
         </div>
 
         {/* 8. Preferred Features */}
-        <div className="card p-6 border-slate-700 space-y-4">
+        <div className="card reveal delay-3 p-6 border-slate-700 space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-emerald-400" /> 8. Preferred Features
           </h3>
@@ -313,7 +313,7 @@ export default function AdminAnalytics() {
                 </div>
                 <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                   <div
-                    className="bg-emerald-500 h-full rounded-full"
+                    className="bg-emerald-500 h-full rounded-full bar-grow"
                     style={{ width: `${(item.count / kpis.total_lost) * 100}%` }}
                   ></div>
                 </div>

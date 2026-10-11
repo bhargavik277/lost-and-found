@@ -1,9 +1,10 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './store/AuthContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import useScrollReveal from './hooks/useScrollReveal'
 
 // Public Pages
 import Landing from './pages/Landing'
@@ -31,14 +32,19 @@ import AdminUsers from './pages/admin/AdminUsers'
 // Security Desk Pages
 import SecurityDashboard from './pages/security/SecurityDashboard'
 
-export default function App() {
+// Inner component so we can read the location for page transitions.
+function AppRoutes() {
+  const location = useLocation()
+  // Kick off the global scroll-reveal observer once for the whole app.
+  useScrollReveal()
+
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-navy-900 text-slate-100 selection:bg-indigo-500/30 selection:text-white">
+    <>
           <Navbar />
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            <Routes>
+            {/* keying on pathname replays the fade/slide transition on route change */}
+            <div key={location.pathname} className="page-transition">
+            <Routes location={location}>
               {/* Public Routes */}
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
@@ -166,8 +172,19 @@ export default function App() {
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            </div>
           </main>
           <Footer />
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <div className="min-h-screen flex flex-col bg-navy-900 bg-ambient-animated text-slate-100 selection:bg-indigo-500/30 selection:text-indigo-200 relative">
+          <AppRoutes />
         </div>
       </BrowserRouter>
     </AuthProvider>

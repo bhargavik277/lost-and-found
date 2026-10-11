@@ -254,7 +254,22 @@
   }
 
   .table-row {
-    @apply border-b border-slate-700/40 hover:bg-white/2 transition-colors;
+    @apply border-b border-slate-700/40 hover:bg-white/[0.03] transition-colors;
+  }
+
+  /* ── Interactive Lift ────────────────────────────────────────── */
+  .interactive-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10;
+  }
+
+  /* ── Segmented OTP Input ─────────────────────────────────────── */
+  .otp-digit-box {
+    @apply w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-mono font-bold rounded-2xl bg-slate-900 border-2 border-slate-700 text-white
+           transition-all duration-200 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-500/20 focus:scale-105;
+  }
+
+  .otp-digit-box-filled {
+    @apply border-amber-500/80 bg-amber-950/20 text-amber-300;
   }
 }
 
@@ -269,21 +284,245 @@
 
   /* Glow effects */
   .glow-indigo {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
   }
 
   .glow-emerald {
-    box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
   }
 
-  /* Gradient backgrounds */
+  .glow-amber {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+  }
+
+  .glow-rose {
+    box-shadow: 0 0 30px rgba(244, 63, 94, 0.2);
+  }
+
+  /* Subtle Rim Highlight */
+  .rim-highlight {
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Ambient backgrounds */
   .bg-hero-gradient {
-    background: radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.10) 0%, transparent 60%),
+    background: radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.12) 0%, transparent 60%),
                 #0f172a;
+  }
+
+  .bg-ambient-mesh {
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.10) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+  }
+
+  .bg-grid-pattern {
+    background-size: 32px 32px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+
+  .bg-dots-pattern {
+    background-size: 24px 24px;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   }
 
   .bg-card-gradient {
     background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+  }
+}
+
+/* ── Entrance & Stagger System ──────────────────────────────── */
+@layer utilities {
+  /* ── Scroll-reveal system ─────────────────────────────────────
+     Elements with .reveal / .reveal-fade fade + slide into view as they
+     ENTER the viewport (driven by IntersectionObserver in useScrollReveal).
+
+     The hidden state is GATED behind `.reveal-ready` on <html>, which the
+     observer sets the moment it boots. If the observer never runs (JS
+     disabled, a runtime error, a bot), `.reveal-ready` is never added, so
+     these rules never apply and all content stays FULLY VISIBLE — we never
+     risk leaving text permanently invisible. */
+  .reveal-ready .reveal,
+  .reveal-ready .reveal-fade {
+    opacity: 0;
+  }
+
+  .reveal-ready .reveal {
+    transform: translateY(16px);
+  }
+
+  .reveal-ready .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal-ready .reveal-fade.is-visible {
+    opacity: 1;
+    transition: opacity 0.6s ease;
+  }
+
+  /* Stagger delays (transition-delay; use with .reveal / .reveal-fade) */
+  .delay-1 { transition-delay: 60ms; }
+  .delay-2 { transition-delay: 120ms; }
+  .delay-3 { transition-delay: 180ms; }
+  .delay-4 { transition-delay: 240ms; }
+  .delay-5 { transition-delay: 300ms; }
+  .delay-6 { transition-delay: 360ms; }
+  .delay-7 { transition-delay: 420ms; }
+  .delay-8 { transition-delay: 480ms; }
+
+  /* Score / progress bars grow from left when scrolled into view */
+  .reveal-ready .bar-grow {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .reveal-ready .bar-grow.is-visible {
+    transform: scaleX(1);
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Fallback: if the reveal system isn't driving (no .reveal-ready), keep bars full */
+  .bar-grow {
+    transform-origin: left center;
+  }
+
+  /* Subtle number/KPI emphasis on mount (does not alter value) */
+  .count-emphasis {
+    animation: countPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    display: inline-block;
+  }
+
+  @keyframes countPop {
+    0% { opacity: 0; transform: translateY(8px) scale(0.92); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Slowly drifting ambient gradient wash (background layer) */
+  .bg-ambient-animated {
+    background:
+      radial-gradient(32rem 32rem at 12% 18%, rgba(99, 102, 241, 0.10) 0%, transparent 60%),
+      radial-gradient(28rem 28rem at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
+      radial-gradient(30rem 30rem at 55% 90%, rgba(16, 185, 129, 0.06) 0%, transparent 60%);
+    animation: ambientDrift 24s ease-in-out infinite alternate;
+  }
+
+  @keyframes ambientDrift {
+    0% { background-position: 0% 0%, 100% 0%, 50% 100%; background-size: 100% 100%; }
+    100% { background-position: 10% 6%, 90% 8%, 45% 92%; background-size: 110% 110%; }
+  }
+
+  /* Gradient sweep sheen for primary buttons */
+  .btn-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.18) 45%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+  }
+
+  .btn-sheen:hover::after {
+    transform: translateX(120%);
+  }
+
+  /* Soft pulsing halo for strong-match emphasis */
+  .halo-pulse {
+    animation: haloPulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes haloPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.22); }
+    50% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+  }
+
+  /* Slide-in for toasts / notification rows */
+  .slide-in-right {
+    animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Modal shell: overlay + panel share one entrance */
+  .modal-overlay {
+    animation: modalFade 0.25s ease both;
+  }
+
+  .modal-panel {
+    animation: modalIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes modalFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Modal exit: reverse of the entrance, played before unmount via
+     .is-closing (see useModalExit hook) */
+  .modal-overlay.is-closing {
+    animation: modalFade 0.18s ease reverse both;
+  }
+
+  .modal-panel.is-closing {
+    animation: modalIn 0.18s cubic-bezier(0.4, 0, 1, 1) reverse both;
+  }
+
+  /* ── Page transitions ───────────────────────────────────────────
+     Applied to the keyed wrapper around <Routes> in App.jsx, so every
+     navigation replays a subtle fade + slide. */
+  .page-transition {
+    animation: pageIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Navbar active-link indicator: scales + fades in on route change */
+  .nav-indicator {
+    animation: navIndicatorIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes navIndicatorIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+}
+
+/* Accessible, consistent keyboard focus ring */
+:focus-visible {
+  outline: 2px solid rgba(129, 140, 248, 0.7);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

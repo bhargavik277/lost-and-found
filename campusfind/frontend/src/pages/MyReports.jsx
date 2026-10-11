@@ -49,19 +49,19 @@ export default function MyReports() {
           <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs">
             <button
               onClick={() => setFilter('ALL')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${filter === 'ALL' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${filter === 'ALL' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
             >
               All ({items.length})
             </button>
             <button
               onClick={() => setFilter('LOST')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${filter === 'LOST' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${filter === 'LOST' ? 'bg-rose-600 text-white shadow-md shadow-rose-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
             >
               Lost ({items.filter(i => i.report_type === 'LOST').length})
             </button>
             <button
               onClick={() => setFilter('FOUND')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${filter === 'FOUND' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${filter === 'FOUND' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
             >
               Found ({items.filter(i => i.report_type === 'FOUND').length})
             </button>
@@ -69,7 +69,7 @@ export default function MyReports() {
 
           <Link
             to="/report-lost"
-            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 flex items-center gap-1.5 transition-all"
+            className="btn-sheen px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
           >
             <PlusCircle className="w-4 h-4" /> New Report
           </Link>
@@ -82,12 +82,13 @@ export default function MyReports() {
         </div>
       ) : filteredItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item) => (
-            <ItemCard
-              key={item.id}
-              item={item}
-              showReporter={false}
-            />
+          {filteredItems.map((item, idx) => (
+            <div key={item.id} className={`reveal delay-${(idx % 8) + 1}`}>
+              <ItemCard
+                item={item}
+                showReporter={false}
+              />
+            </div>
           ))}
         </div>
       ) : (

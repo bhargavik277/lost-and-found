@@ -12,6 +12,7 @@ export default defineConfig({
       '/claims': 'http://localhost:8000',
       '/notifications': 'http://localhost:8000',
       '/admin': 'http://localhost:8000',
+      '/security': 'http://localhost:8000',
       '/uploads': 'http://localhost:8000',
     },
   },

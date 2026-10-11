@@ -125,10 +125,10 @@ export default function ReportLost() {
   return (
     <div className="max-w-2xl mx-auto py-6 animate-fade-in pb-16">
       <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-6 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        <ArrowLeft className="w-4 h-4 transition-transform duration-200 hover:-translate-x-0.5" /> Back to Dashboard
       </Link>
 
-      <div className="card bg-navy-800 border-slate-700 shadow-2xl p-6 sm:p-8 space-y-6">
+      <div className="card reveal bg-navy-800 border-slate-700 shadow-2xl p-6 sm:p-8 space-y-6">
         {/* Header */}
         <div className="flex items-start gap-4 pb-4 border-b border-slate-700">
           <div className="w-12 h-12 rounded-2xl bg-rose-600/20 text-rose-400 border border-rose-500/30 flex items-center justify-center shrink-0">
@@ -143,14 +143,14 @@ export default function ReportLost() {
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-300">
+          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-300 animate-slide-down">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-3 text-xs text-emerald-300">
+          <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-3 text-xs text-emerald-300 animate-slide-down">
             <CheckCircle2 className="w-5 h-5 shrink-0" />
             <div>
               <div className="font-bold">Report Created Successfully!</div>
@@ -171,7 +171,7 @@ export default function ReportLost() {
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
               placeholder="e.g., Space Gray MacBook Pro 14, Blue HydroFlask Bottle, TI-84 Calculator"
-              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
             />
           </div>
 
@@ -184,7 +184,7 @@ export default function ReportLost() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -199,7 +199,7 @@ export default function ReportLost() {
               <select
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 cursor-pointer"
               >
                 {LOCATIONS.map((loc) => (
                   <option key={loc} value={loc}>{loc}</option>
@@ -219,7 +219,7 @@ export default function ReportLost() {
                 required
                 value={dateReported}
                 onChange={(e) => setDateReported(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
               />
             </div>
 
@@ -232,7 +232,7 @@ export default function ReportLost() {
                 value={timeReported}
                 onChange={(e) => setTimeReported(e.target.value)}
                 placeholder="e.g., 14:30 or 2:30 PM"
-                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
               />
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function ReportLost() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe brand, color, stickers, scratches, case, or distinguishing characteristics (used by AI text matching)..."
-              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
             />
           </div>
 
@@ -256,10 +256,10 @@ export default function ReportLost() {
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               Attach Reference Photo (Optional)
             </label>
-            <div className="border-2 border-dashed border-slate-700 hover:border-indigo-500/50 rounded-2xl p-4 text-center transition-colors">
+            <div className="border-2 border-dashed border-slate-700 hover:border-indigo-500/50 hover:bg-indigo-500/[0.03] rounded-2xl p-4 text-center transition-all duration-300">
               {imagePreview ? (
                 <div className="space-y-2">
-                  <img src={imagePreview} alt="Preview" className="h-32 mx-auto object-cover rounded-xl" />
+                  <img src={imagePreview} alt="Preview" className="h-32 mx-auto object-cover rounded-xl animate-scale-up shadow-lg shadow-indigo-500/10" />
                   <button
                     type="button"
                     onClick={() => { setImageFile(null); setImagePreview(null); }}
@@ -289,7 +289,7 @@ export default function ReportLost() {
             <button
               type="submit"
               disabled={loading || success}
-              className="px-6 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-lg shadow-rose-600/25 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="btn-sheen px-6 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-lg shadow-rose-600/25 hover:shadow-rose-600/40 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95 disabled:hover:scale-100"
             >
               {loading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

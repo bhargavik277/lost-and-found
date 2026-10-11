@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Shield, X, AlertCircle, CheckCircle2, Lock } from 'lucide-react'
 import { claimsAPI } from '../services/api'
+import useModalExit from '../hooks/useModalExit'
 
 export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
   const [proofDescription, setProofDescription] = useState('')
@@ -10,6 +11,7 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const { closing, handleClose } = useModalExit(onClose)
 
   if (!isOpen || !item) return null
 
@@ -35,7 +37,7 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
       setTimeout(() => {
         setSuccessMessage('')
         if (onSuccess) onSuccess()
-        onClose()
+        handleClose()
       }, 1800)
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to submit claim. You may already have a pending claim for this item.')
@@ -45,19 +47,20 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="card w-full max-w-lg bg-navy-900 border-slate-700 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/80 backdrop-blur-md modal-overlay ${closing ? 'is-closing' : ''}`}>
+      <div className={`card w-full max-w-lg bg-navy-900/95 border-slate-700/80 shadow-2xl shadow-indigo-950/50 relative max-h-[90vh] overflow-y-auto modal-panel ${closing ? 'is-closing' : ''}`}>
         {/* Close Button */}
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+          onClick={handleClose}
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+          aria-label="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shadow-md shadow-indigo-500/10">
             <Shield className="w-5 h-5" />
           </div>
           <div>
@@ -69,7 +72,7 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
         </div>
 
         {/* Privacy Alert */}
-        <div className="p-3 mb-4 rounded-xl bg-indigo-950/40 border border-indigo-500/20 flex items-start gap-2.5 text-xs text-slate-300">
+        <div className="p-3 mb-4 rounded-xl bg-indigo-950/40 border border-indigo-500/25 flex items-start gap-2.5 text-xs text-slate-300">
           <Lock className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
           <span>
             <strong>Confidential Verification:</strong> The details you provide here are private and only accessible to Campus Administrators to verify true ownership before item handover.
@@ -77,14 +80,14 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
         </div>
 
         {error && (
-          <div className="p-3 mb-4 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300">
+          <div className="p-3 mb-4 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300 animate-slide-down">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="p-3 mb-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-300">
+          <div className="p-3 mb-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-300 animate-slide-down">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{successMessage}</span>
           </div>
@@ -102,7 +105,7 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
               value={proofDescription}
               onChange={(e) => setProofDescription(e.target.value)}
               placeholder="Describe specific details only the true owner would know (e.g., brand model, contents inside, color of case, wallpaper, passwords, receipts)..."
-              className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all leading-relaxed"
             />
           </div>
 
@@ -115,7 +118,7 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
               value={distinctiveFeatures}
               onChange={(e) => setDistinctiveFeatures(e.target.value)}
               placeholder="e.g. Serial #12345, yellow smiley sticker, cracked bottom left edge"
-              className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
             />
           </div>
 
@@ -128,7 +131,7 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
               value={approximateTime}
               onChange={(e) => setApproximateTime(e.target.value)}
               placeholder="e.g. Yesterday afternoon around 2:30 PM after CS Lecture"
-              className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
             />
           </div>
 
@@ -141,24 +144,31 @@ export default function ClaimModal({ item, isOpen, onClose, onSuccess }) {
               value={additionalInfo}
               onChange={(e) => setAdditionalInfo(e.target.value)}
               placeholder="e.g. Can meet security desk between 10am - 4pm"
-              className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
             />
           </div>
 
           <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors"
+              onClick={handleClose}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="btn-sheen px-5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-105"
             >
-              {loading ? 'Submitting...' : 'Submit Claim Request'}
+              {loading ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                'Submit Claim Request'
+              )}
             </button>
           </div>
         </form>

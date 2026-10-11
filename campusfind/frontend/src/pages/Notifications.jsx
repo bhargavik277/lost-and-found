@@ -71,7 +71,7 @@ export default function Notifications() {
         {notifications.some(n => !n.is_read) && (
           <button
             onClick={markAllRead}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer"
           >
             <CheckCheck className="w-4 h-4 text-emerald-400" /> Mark All as Read
           </button>
@@ -84,14 +84,14 @@ export default function Notifications() {
         </div>
       ) : notifications.length > 0 ? (
         <div className="space-y-3">
-          {notifications.map((notif) => (
+          {notifications.map((notif, idx) => (
             <div
               key={notif.id}
               onClick={() => !notif.is_read && markRead(notif.id)}
-              className={`p-4 rounded-2xl border transition-all duration-200 flex items-start gap-3.5 ${
+              className={`p-4 rounded-2xl border transition-all duration-300 flex items-start gap-3.5 reveal delay-${(idx % 8) + 1} ${
                 notif.is_read
                   ? 'bg-navy-800/60 border-slate-750 text-slate-400'
-                  : 'bg-indigo-950/20 border-indigo-500/30 text-white shadow-lg shadow-indigo-500/5 cursor-pointer hover:border-indigo-500/50'
+                  : 'bg-indigo-950/20 border-indigo-500/30 text-white shadow-lg shadow-indigo-500/5 cursor-pointer hover:border-indigo-500/50 hover:-translate-y-0.5 hover:shadow-indigo-500/10'
               }`}
             >
               <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 shrink-0 mt-0.5">
@@ -132,7 +132,7 @@ export default function Notifications() {
               </div>
 
               {!notif.is_read && (
-                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-2 shrink-0 animate-pulse"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-2 shrink-0 animate-pulse ring-4 ring-indigo-500/15"></div>
               )}
             </div>
           ))}
