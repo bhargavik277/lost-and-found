@@ -7,9 +7,8 @@ import React, { useEffect, useRef, useState } from 'react'
  *
  * Use for KPI stats: <CountUp value={kpis.total_items || 0} />
  */
-export default function CountUp({ value, end, duration = 700, className, decimals = 0, suffix = '' }) {
-  const rawTarget = value !== undefined ? value : end
-  const target = Number(rawTarget) || 0
+export default function CountUp({ value, duration = 700, className }) {
+  const target = Number(value) || 0
   const [display, setDisplay] = useState(target)
   const fromRef = useRef(target)
   const frameRef = useRef(null)
@@ -30,8 +29,8 @@ export default function CountUp({ value, end, duration = 700, className, decimal
     const tick = (now) => {
       const t = Math.min((now - start) / duration, 1)
       const eased = 1 - Math.pow(1 - t, 3) // ease-out cubic
-      const current = from + (target - from) * eased
-      setDisplay(decimals > 0 ? Number(current.toFixed(decimals)) : Math.round(current))
+      const current = Math.round(from + (target - from) * eased)
+      setDisplay(current)
       if (t < 1) {
         frameRef.current = requestAnimationFrame(tick)
       } else {
@@ -44,9 +43,7 @@ export default function CountUp({ value, end, duration = 700, className, decimal
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current)
     }
-  }, [target, duration, decimals])
+  }, [target, duration])
 
-  const formatted = decimals > 0 ? Number(display).toFixed(decimals) : display
-
-  return <span className={className}>{formatted}{suffix}</span>
+  return <span className={className}>{display}</span>
 }

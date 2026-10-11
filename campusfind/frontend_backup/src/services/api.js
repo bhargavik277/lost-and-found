@@ -1,0 +1,100 @@
+import axios from 'axios'
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/',
+  timeout: 15000,
+})
+
+// Request interceptor — attach token on every outgoing request
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('campusfind_token')
+    if (token) {
+      config.headers = config.headers || {}
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
+// Response interceptor — handle 401 globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('campusfind_token')
+      localStorage.removeItem('campusfind_user')
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+export const authAPI = {
+  register: (data) => api.post('/auth/register', data),
+  login: (data) => api.post('/auth/login', data),
+  me: () => api.get('/auth/me'),
+}
+
+// ── Items ─────────────────────────────────────────────────────────────────────
+export const itemsAPI = {
+  list: (params) => api.get('/items', { params }),
+  get: (id) => api.get(`/items/${id}`),
+  myItems: () => api.get('/items/my'),
+  reportLost: (formData) => api.post('/items/lost', formData),
+  reportFound: (formData) => api.post('/items/found', formData),
+  update: (id, data) => api.patch(`/items/${id}`, data),
+}
+
+// ── Matches ───────────────────────────────────────────────────────────────────
+export const matchesAPI = {
+  list: () => api.get('/matches'),
+  get: (id) => api.get(`/matches/${id}`),
+  updateStatus: (id, status) => api.patch(`/matches/${id}`, { status }),
+}
+
+// ── Claims ────────────────────────────────────────────────────────────────────
+export const claimsAPI = {
+  submit: (data) => api.post('/claims', data),
+  myClaims: () => api.get('/claims/my'),
+  get: (id) => api.get(`/claims/${id}`),
+  getOtp: (id) => api.get(`/claims/${id}/otp`),
+  regenerateOtp: (id) => api.post(`/claims/${id}/regenerate-otp`),
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+export const notificationsAPI = {
+  list: () => api.get('/notifications'),
+  unreadCount: () => api.get('/notifications/unread-count'),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.post('/notifications/read-all'),
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+export const adminAPI = {
+  analytics: () => api.get('/admin/analytics'),
+  items: (params) => api.get('/admin/items', { params }),
+  updateItem: (id, data) => api.patch(`/admin/items/${id}`, data),
+  deleteItem: (id) => api.delete(`/admin/items/${id}`),
+  claims: (params) => api.get('/admin/claims', { params }),
+  getClaim: (id) => api.get(`/admin/claims/${id}`),
+  reviewClaim: (id, data) => api.patch(`/admin/claims/${id}/review`, data),
+  verifyOtp: (id, otp) => api.post(`/admin/claims/${id}/verify-otp`, { otp }),
+  regenerateOtp: (id) => api.post(`/admin/claims/${id}/regenerate-otp`),
+  users: () => api.get('/admin/users'),
+}
+
+// ── Security Desk ─────────────────────────────────────────────────────────────
+export const securityAPI = {
+  collections: () => api.get('/security/collections'),
+  pendingCollections: () => api.get('/security/collections/pending'),
+  completedCollections: () => api.get('/security/collections/completed'),
+  verifyOtp: (claimId, otp) => api.post(`/security/collections/${claimId}/verify-otp`, { otp }),
+}
+
+
+export default api

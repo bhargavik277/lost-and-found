@@ -1,18 +1,17 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { itemsAPI } from '../services/api'
-import {
-  PlusCircle,
-  ArrowLeft,
-  Upload,
-  MapPin,
-  Calendar,
-  Clock,
-  AlertCircle,
-  CheckCircle2,
-  X,
-  FileText,
-  ShieldCheck
+import { 
+  PlusCircle, 
+  MapPin, 
+  Calendar, 
+  Clock, 
+  Upload, 
+  AlertCircle, 
+  CheckCircle2, 
+  ArrowLeft, 
+  Sparkles,
+  ShieldAlert
 } from 'lucide-react'
 
 const CATEGORIES = [
@@ -27,24 +26,24 @@ const CATEGORIES = [
 const LOCATIONS = [
   'Library',
   'Computer Lab',
-  'Cafeteria',
-  'Sports Complex',
-  'Main Auditorium',
-  'Science Block',
-  'Engineering Building',
-  'Student Center',
-  'Campus Grounds',
-  'Other',
+  'Classroom',
+  'Laboratory',
+  'Auditorium',
+  'Canteen',
+  'Corridor',
+  'Parking',
+  'Playground',
+  'Sports Room',
 ]
 
 export default function ReportFound() {
   const navigate = useNavigate()
   const [itemName, setItemName] = useState('')
-  const [category, setCategory] = useState(CATEGORIES[0])
-  const [description, setDescription] = useState('')
-  const [location, setLocation] = useState(LOCATIONS[0])
+  const [category, setCategory] = useState('Electronics')
+  const [location, setLocation] = useState('Library')
   const [dateReported, setDateReported] = useState(new Date().toISOString().split('T')[0])
   const [timeReported, setTimeReported] = useState('')
+  const [description, setDescription] = useState('')
   const [additionalDetails, setAdditionalDetails] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
@@ -56,59 +55,65 @@ export default function ReportFound() {
     const file = e.target.files[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setError('Image file must be under 5MB')
+        setError('Image file size must be less than 5MB.')
         return
       }
       setImageFile(file)
       setImagePreview(URL.createObjectURL(file))
-      setError('')
     }
-  }
-
-  const removeImage = () => {
-    setImageFile(null)
-    setImagePreview(null)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (loading) return
-    setError('')
+    if (!itemName.trim()) {
+      setError('Item name is required.')
+      return
+    }
+    if (!location.trim()) {
+      setError('Location is required.')
+      return
+    }
+    if (!dateReported) {
+      setError('Date found is required.')
+      return
+    }
+
     setLoading(true)
+    setError('')
+
+    const formData = new FormData()
+    formData.append('item_name', itemName.trim())
+    formData.append('category', category)
+    formData.append('location', location.trim())
+    formData.append('date_reported', dateReported)
+    if (timeReported && timeReported.trim()) {
+      formData.append('time_reported', timeReported.trim())
+    }
+    if (description && description.trim()) {
+      formData.append('description', description.trim())
+    }
+    if (additionalDetails && additionalDetails.trim()) {
+      formData.append('additional_details', additionalDetails.trim())
+    }
+    if (imageFile) {
+      formData.append('image', imageFile)
+    }
 
     try {
-      const formData = new FormData()
-      formData.append('item_name', itemName)
-      formData.append('category', category)
-      formData.append('report_type', 'FOUND')
-      formData.append('location', location)
-      formData.append('date_reported', dateReported)
-      if (description.trim()) {
-        formData.append('description', description)
-      }
-      if (timeReported.trim()) {
-        formData.append('time_reported', timeReported)
-      }
-      if (additionalDetails.trim()) {
-        formData.append('additional_details', additionalDetails)
-      }
-      if (imageFile) {
-        formData.append('image', imageFile)
-      }
-
-      await itemsAPI.create(formData)
+      await itemsAPI.reportFound(formData)
       setSuccess(true)
       setTimeout(() => {
-        navigate('/search')
+        navigate('/dashboard')
       }, 1500)
     } catch (err) {
-      let errorMsg = 'Failed to submit found report. Please check your connection and inputs.'
-      if (err.response?.data?.detail) {
-        if (Array.isArray(err.response.data.detail)) {
-          errorMsg = err.response.data.detail.map(d => `${d.loc ? d.loc.slice(-1) : ''}: ${d.msg}`).join(', ')
-        } else {
-          errorMsg = String(err.response.data.detail)
-        }
+      const detail = err.response?.data?.detail
+      let errorMsg = 'Failed to submit report. Please check all fields.'
+      if (typeof detail === 'string') {
+        errorMsg = detail
+      } else if (Array.isArray(detail)) {
+        errorMsg = detail.map((d) => d.msg || `${d.loc?.slice(-1)[0]}: ${d.msg}`).join(', ')
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message
       } else if (err.message) {
         errorMsg = err.message
       }
@@ -119,83 +124,91 @@ export default function ReportFound() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-4 sm:py-6 animate-fade-in pb-16">
-      <Link
-        to="/dashboard"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 mb-6 transition-colors"
-      >
+    <div className="max-w-2xl mx-auto py-6 animate-fade-in pb-16">
+      <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to Dashboard
       </Link>
 
-      <div className="card reveal bg-white border-slate-200/90 shadow-md p-6 sm:p-9 space-y-6">
+      <div className="card bg-navy-800 border-slate-700 shadow-2xl p-6 sm:p-8 space-y-6">
         {/* Header */}
-        <div className="flex items-start gap-4 pb-5 border-b border-slate-100">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
+        <div className="flex items-start gap-4 pb-4 border-b border-slate-700">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
             <PlusCircle className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Report Found Item</h1>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Help reconnect lost belongings with their owner. Once reported, our matching radar alerts potential claimants.
+            <h1 className="text-2xl font-bold text-white tracking-tight">Report Found Item</h1>
+            <p className="text-xs text-slate-400 mt-1">
+              Help reconnect a student with their misplaced belongings. After reporting, you can deposit the item at the Campus Security Desk.
             </p>
           </div>
         </div>
 
+        {/* Security Tip Banner */}
+        <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 flex items-start gap-2.5 text-xs text-slate-300">
+          <ShieldAlert className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+          <span>
+            <strong>Anti-Fraud Protection:</strong> Do not publicly disclose sensitive serial codes or lock codes. Keep them private so claimants must verify true ownership.
+          </span>
+        </div>
+
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-2.5 text-xs text-rose-700 font-medium">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-300">
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-2.5 text-xs text-emerald-800 font-semibold animate-slide-up">
-            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
-            <span>Found report submitted successfully! Redirecting to Item Catalog...</span>
+          <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-3 text-xs text-emerald-300">
+            <CheckCircle2 className="w-5 h-5 shrink-0" />
+            <div>
+              <div className="font-bold">Found Report Submitted Successfully!</div>
+              <div>The item has been saved and our matching engine is correlating candidates.</div>
+            </div>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Item Name */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Item Name / Title <span className="text-rose-500">*</span>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Item Name <span className="text-rose-400">*</span>
             </label>
             <input
               type="text"
               required
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
-              placeholder="e.g. Scientific Calculator, Water Bottle, Keys with lanyard"
-              className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all shadow-xs"
+              placeholder="e.g., Apple AirPods Pro Case, TI-84 Scientific Calculator, Brown Leather Wallet"
+              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
             />
           </div>
 
-          {/* Category & Location */}
+          {/* Category & Location Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Category <span className="text-rose-500">*</span>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Category <span className="text-rose-400">*</span>
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all shadow-xs cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Location Found <span className="text-rose-500">*</span>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Where Did You Find It? <span className="text-rose-400">*</span>
               </label>
               <select
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all shadow-xs cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
                 {LOCATIONS.map((loc) => (
                   <option key={loc} value={loc}>{loc}</option>
@@ -204,124 +217,95 @@ export default function ReportFound() {
             </div>
           </div>
 
-          {/* Date & Time Found */}
+          {/* Date & Time Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Date Found <span className="text-rose-500">*</span>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Date Found <span className="text-rose-400">*</span>
               </label>
-              <div className="relative">
-                <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="date"
-                  required
-                  value={dateReported}
-                  onChange={(e) => setDateReported(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all shadow-xs"
-                />
-              </div>
+              <input
+                type="date"
+                required
+                value={dateReported}
+                onChange={(e) => setDateReported(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 Approximate Time (Optional)
               </label>
-              <div className="relative">
-                <Clock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={timeReported}
-                  onChange={(e) => setTimeReported(e.target.value)}
-                  placeholder="e.g. 2:15 PM, Lunch break"
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all shadow-xs"
-                />
-              </div>
+              <input
+                type="text"
+                value={timeReported}
+                onChange={(e) => setTimeReported(e.target.value)}
+                placeholder="e.g., 10:15 AM or 17:00"
+                className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Public Description
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              General Appearance Description
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="General description without revealing private confidential marks..."
-              className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all shadow-xs"
-            />
-          </div>
-
-          {/* Secure Handover Note */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Handover / Safe-Keeping Location Note (Optional)
-            </label>
-            <textarea
-              rows={2}
-              value={additionalDetails}
-              onChange={(e) => setAdditionalDetails(e.target.value)}
-              placeholder="e.g. Handed over to Main Security Desk, Kept with Lab Instructor in Room 204..."
-              className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/15 transition-all shadow-xs"
+              placeholder="e.g. Found on 3rd floor bench near computer lab door, black color case..."
+              className="w-full px-3.5 py-2.5 bg-slate-850 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
             />
           </div>
 
           {/* Image Upload */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Upload Item Photo (Optional, max 5MB)
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Photo of Found Item (Optional)
             </label>
-            {imagePreview ? (
-              <div className="relative inline-block border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-48 h-36 object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 p-1 bg-slate-900/80 text-white rounded-full hover:bg-rose-600 transition-colors cursor-pointer"
-                  title="Remove image"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <label className="border-2 border-dashed border-slate-300 hover:border-indigo-400 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors bg-slate-50/50 hover:bg-indigo-50/20">
-                <Upload className="w-8 h-8 text-slate-400 mb-2" />
-                <span className="text-xs font-bold text-slate-700">Click to upload photo</span>
-                <span className="text-[11px] text-slate-400 mt-0.5">PNG, JPG up to 5MB</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </label>
-            )}
+            <div className="border-2 border-dashed border-slate-700 hover:border-indigo-500/50 rounded-2xl p-4 text-center transition-colors">
+              {imagePreview ? (
+                <div className="space-y-2">
+                  <img src={imagePreview} alt="Preview" className="h-32 mx-auto object-cover rounded-xl" />
+                  <button
+                    type="button"
+                    onClick={() => { setImageFile(null); setImagePreview(null); }}
+                    className="text-xs text-rose-400 hover:underline cursor-pointer"
+                  >
+                    Remove photo
+                  </button>
+                </div>
+              ) : (
+                <label className="cursor-pointer block space-y-1">
+                  <Upload className="w-6 h-6 text-slate-400 mx-auto" />
+                  <span className="text-xs font-semibold text-indigo-400">Click to upload photo</span>
+                  <span className="text-[11px] text-slate-500 block">PNG, JPG up to 5MB</span>
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                </label>
+              )}
+            </div>
           </div>
 
-          {/* Submit Actions */}
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-slate-700 flex items-center justify-end gap-3">
             <Link
               to="/dashboard"
-              className="px-5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={loading || success}
-              className="btn-sheen px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-sm shadow-emerald-600/25 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/25 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               {loading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 <>
-                  <PlusCircle className="w-4 h-4" />
-                  <span>Submit Found Report</span>
+                  <Sparkles className="w-4 h-4" />
+                  <span>Submit Found Item</span>
                 </>
               )}
             </button>
