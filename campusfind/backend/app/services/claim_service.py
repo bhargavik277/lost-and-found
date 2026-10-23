@@ -621,6 +621,10 @@ def verify_claim_otp(
             related_item_id=claim.item_id,
         )
 
+    # Award Star Reputation & Achievement Badges for verified recovery
+    from app.services.reward_service import process_item_recovery
+    process_item_recovery(db, claim)
+
     db.commit()
     db.refresh(claim)
     _enrich_claim_admin(db, claim)

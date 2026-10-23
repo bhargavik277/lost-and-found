@@ -96,5 +96,12 @@ export const securityAPI = {
   verifyOtp: (claimId, otp) => api.post(`/security/collections/${claimId}/verify-otp`, { otp }),
 }
 
+// ── Rewards & Badges ──────────────────────────────────────────────────────────
+export const rewardsAPI = {
+  myRewards: () => api.get('/rewards/my'),
+  getUserRewards: (userId) => api.get(`/rewards/user/${userId}`),
+}
+
 
 export default api
+

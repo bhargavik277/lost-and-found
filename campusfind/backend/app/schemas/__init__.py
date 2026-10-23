@@ -3,6 +3,7 @@ from app.schemas.item import ItemCreate, ItemUpdate, ItemOut, ItemSearchParams, 
 from app.schemas.match import MatchOut, MatchUpdate
 from app.schemas.claim import ClaimCreate, ClaimReview, ClaimOut, ClaimOutAdmin
 from app.schemas.notification import NotificationOut
+from app.schemas.reward import BadgeOut, MilestoneOut, RecentRecoveryOut, UserRewardsSummaryOut
 
 __all__ = [
     "UserRegister", "UserLogin", "UserOut", "TokenResponse",
@@ -10,4 +11,5 @@ __all__ = [
     "MatchOut", "MatchUpdate",
     "ClaimCreate", "ClaimReview", "ClaimOut", "ClaimOutAdmin",
     "NotificationOut",
+    "BadgeOut", "MilestoneOut", "RecentRecoveryOut", "UserRewardsSummaryOut",
 ]

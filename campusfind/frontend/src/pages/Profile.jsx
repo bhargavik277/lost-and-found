@@ -1,11 +1,28 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../store/AuthContext'
-import { User, Mail, Hash, Shield, LogOut, Calendar } from 'lucide-react'
+import { User, Mail, Hash, Shield, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { rewardsAPI } from '../services/api'
+import RewardsSection from '../components/RewardsSection'
 
 export default function Profile() {
   const { user, logout, isAdmin } = useAuth()
   const navigate = useNavigate()
+  const [rewards, setRewards] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+    rewardsAPI.myRewards()
+      .then(res => {
+        if (isMounted) setRewards(res.data)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+    return () => { isMounted = false }
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -13,7 +30,8 @@ export default function Profile() {
   }
 
   return (
-    <div className="max-w-xl mx-auto py-8 animate-fade-in pb-16">
+    <div className="max-w-3xl mx-auto py-8 animate-fade-in pb-16 space-y-8">
+      {/* User Account Card */}
       <div className="card reveal bg-navy-800 border-slate-700 shadow-2xl p-8 space-y-6">
         {/* User Avatar & Header */}
         <div className="flex items-center gap-4 pb-6 border-b border-slate-700">
@@ -73,6 +91,9 @@ export default function Profile() {
           </button>
         </div>
       </div>
+
+      {/* Star Reputation & Achievement Badges Section */}
+      <RewardsSection rewards={rewards} loading={loading} />
     </div>
   )
 }

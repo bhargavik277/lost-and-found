@@ -5,6 +5,7 @@ from app.models.claim import Claim, ClaimStatus
 from app.models.notification import Notification, NotificationType
 from app.models.survey import SurveyResponse
 from app.models.timeline import ItemTimeline
+from app.models.reward import ItemRecovery, UserBadge, BadgeKey
 
 __all__ = [
     "User", "UserRole",
@@ -14,5 +15,6 @@ __all__ = [
     "Notification", "NotificationType",
     "SurveyResponse",
     "ItemTimeline",
+    "ItemRecovery", "UserBadge", "BadgeKey",
 ]
 

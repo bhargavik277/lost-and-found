@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../store/AuthContext'
-import { itemsAPI, matchesAPI, claimsAPI, notificationsAPI } from '../services/api'
+import { itemsAPI, matchesAPI, claimsAPI, notificationsAPI, rewardsAPI } from '../services/api'
 import { 
   PlusCircle, 
   Search, 
@@ -20,6 +20,7 @@ import ItemCard from '../components/ItemCard'
 import MatchCard from '../components/MatchCard'
 import ClaimModal from '../components/ClaimModal'
 import CountUp from '../components/CountUp'
+import RewardsSection from '../components/RewardsSection'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -27,22 +28,25 @@ export default function Dashboard() {
   const [matches, setMatches] = useState([])
   const [claims, setClaims] = useState([])
   const [notifications, setNotifications] = useState([])
+  const [rewards, setRewards] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedClaimItem, setSelectedClaimItem] = useState(null)
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [itemsRes, matchesRes, claimsRes, notifsRes] = await Promise.all([
+      const [itemsRes, matchesRes, claimsRes, notifsRes, rewardsRes] = await Promise.all([
         itemsAPI.myItems(),
         matchesAPI.list(),
         claimsAPI.myClaims(),
         notificationsAPI.list(),
+        rewardsAPI.myRewards().catch(() => ({ data: null })),
       ])
       setMyItems(itemsRes.data || [])
       setMatches(matchesRes.data || [])
       setClaims(claimsRes.data || [])
       setNotifications(notifsRes.data || [])
+      setRewards(rewardsRes.data || null)
     } catch {
       // ignore
     } finally {
@@ -148,6 +152,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Star Reputation & Achievement Badges Section */}
+      <RewardsSection rewards={rewards} loading={loading} />
 
       {/* Main Section: Matches Alert + Recent Reports */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
